@@ -1,0 +1,4 @@
+.DS_Store
+.qt_for_python
+__pycache__
+venv
