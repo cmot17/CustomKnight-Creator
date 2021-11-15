@@ -191,7 +191,7 @@ class spriteHandler:
         spriteHandler.duplicatesHashList = []
         spriteHandler.duplicatesList = []
         filePath = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "duplicatedata.json")
+            os.path.join(os.path.dirname(__file__), "resources/duplicatedata.json")
         )
         duplicatesDict = json.load(open(filePath, "r"))
         keyList = list(duplicatesDict.keys())

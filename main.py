@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 
@@ -11,8 +12,7 @@ from PIL import Image
 from spritepacker_ui import Ui_MainWindow
 from duplicatewizard_ui import Ui_Dialog
 
-QtCore.QDir.addSearchPath('resources', 'resources/')
-
+QtCore.QDir.addSearchPath('resources', 'resources')
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
@@ -103,14 +103,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     greenBrush
                 )
                 self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setIcon(
-                    QtGui.QIcon("resources:checkicon.png")
+                    QtGui.QIcon(
+                        os.path.abspath(
+                            os.path.join(
+                                os.path.dirname(__file__), "resources/checkicon.png"
+                            )
+                        )
+                    )
                 )
             else:
                 self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setBackground(
                     redBrush
                 )
                 self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setIcon(
-                    QtGui.QIcon("resources:xicon.png")
+                    QtGui.QIcon(os.path.abspath(
+                            os.path.join(
+                                os.path.dirname(__file__), "resources/xicon.png"
+                            )
+                        )
+                    )
                 )
         self.updateSavedState()
 
@@ -401,10 +412,20 @@ class WizardDialog(QDialog, Ui_Dialog):
             sortedDuplicates = spriteHandler.sortByHash(index, currentItem)
             if spriteHandler.checkCompletion(sortedDuplicates, currentItem):
                 item.setBackground(greenBrush)
-                item.setIcon(QtGui.QIcon("resources:checkicon.png"))
+                item.setIcon(QtGui.QIcon(os.path.abspath(
+                            os.path.join(
+                                os.path.dirname(__file__), "resources/checkicon.png"
+                            )
+                        )))
             else:
                 item.setBackground(redBrush)
-                item.setIcon(QtGui.QIcon("resources:xicon.png"))
+                item.setIcon(QtGui.QIcon(os.path.abspath(
+                            os.path.join(
+                                os.path.dirname(__file__), "resources/xicon.png"
+                            )
+                        )
+                    )
+                )
 
 
 app = QApplication(sys.argv)
