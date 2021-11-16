@@ -31,5 +31,5 @@ jobs:
       run: ${{matrix.CMD_BUILD}}
     - uses: actions/upload-artifact@v2
       with:
-        name: ${{TARGET}}
-        path: ${{OUT_FILE_NAME}}
+        name: ${{matrix.TARGET}}
+        path: ${{matrix.OUT_FILE_NAME}}
