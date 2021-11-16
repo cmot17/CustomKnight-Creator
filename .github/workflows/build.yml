@@ -12,11 +12,11 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: pyinstaller main.py -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources
-            OUT_FILE_NAME: dist/CustomKnight Creator.app
+            OUT_FILE_PATH: "dist/CustomKnight Creator.app"
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.ico --add-data "resources;resources"
-            OUT_FILE_NAME: dist/CustomKnight Creator.exe
+            OUT_FILE_PATH: "dist/CustomKnight Creator.exe"
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.10
@@ -32,4 +32,4 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: ${{matrix.TARGET}}
-        path: ${{matrix.OUT_FILE_NAME}}
+        path: ${{matrix.OUT_FILE_PATH}}
