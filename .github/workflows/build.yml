@@ -15,7 +15,7 @@ jobs:
             OUT_FILE_NAME: dist/CustomKnight Creator.app
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.ico --add-data resources;resources
+            CMD_BUILD: pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.ico --add-data "resources;resources"
             OUT_FILE_NAME: dist/CustomKnight Creator.exe
     steps:
     - uses: actions/checkout@v2
