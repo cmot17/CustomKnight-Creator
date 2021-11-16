@@ -11,7 +11,10 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
-            CMD_BUILD: pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources
+            CMD_BUILD: >
+              pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources &&
+              cd dist/ &&
+              ls
             OUT_FILE_PATH: "dist/CustomKnight Creator.app"
           - os: windows-latest
             TARGET: windows
