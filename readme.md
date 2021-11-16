@@ -32,15 +32,15 @@ To package the project, use the following [PyInstaller](https://github.com/pyins
 
 ### MacOS:
 ```
-pyinstaller main.py -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources
+pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources
 ```
 ### Windows:
 ```
-(idk i need to test)
+pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.ico --add-data "resources;resources"
 ```
 ### Linux:
 ```
-(idk i need to test)
+pyinstaller main.py -F -n "CustomKnight Creator" --add-data "resources:resources"
 ```
 
 ## Help
