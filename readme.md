@@ -58,6 +58,6 @@ This project is licensed under the GNU GPLv3 License - see the LICENSE.md file f
 
 ## Acknowledgments
 
-* Huge thanks to Maverick#2345 for being incredibly helpful throughout the developement, and providing lots of useful testing + feedback.
+* Huge thanks to Maverick#2345 for being incredibly helpful throughout the developement, writing much of the tutorial, and providing lots of useful testing + feedback.
 * anjaperryyeet#9759 for feedback on the UI
 * MageGi for [SpritePacker](https://github.com/magegihk/HollowKnight.SpritePacker), the inspiration for this program
