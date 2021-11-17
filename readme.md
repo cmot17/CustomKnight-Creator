@@ -12,9 +12,6 @@ Inspired by [SpritePacker](https://github.com/magegihk/HollowKnight.SpritePacker
 
 ## Usage
 
-There is an excellent tutorial video from Maverick#2345:
-
-(EMBED VIDEO)
 
 Visit the [wiki](https://github.com/cmot17/CustomKnight-Creator/wiki) for a written tutorial.
 
@@ -61,6 +58,6 @@ This project is licensed under the GNU GPLv3 License - see the LICENSE.md file f
 
 ## Acknowledgments
 
-* Huge thanks to Maverick#2345 from the Hollow Knight community for being incredibly helpful throughout the developement, providing lots of useful testing, and making an awesome tutorial video.
+* Huge thanks to Maverick#2345 for being incredibly helpful throughout the developement, and providing lots of useful testing + feedback.
 * anjaperryyeet#9759 for feedback on the UI
 * MageGi for [SpritePacker](https://github.com/magegihk/HollowKnight.SpritePacker), the inspiration for this program
