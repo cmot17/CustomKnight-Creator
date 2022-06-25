@@ -12,7 +12,8 @@ from PIL import Image
 from spritepacker_ui import Ui_MainWindow
 from duplicatewizard_ui import Ui_Dialog
 
-QtCore.QDir.addSearchPath('resources', 'resources')
+QtCore.QDir.addSearchPath("resources", "resources")
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
@@ -84,6 +85,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         files = []
         for i in range(self.listWidget.count()):
             files.append(self.listWidget.item(i).text() + "/0.Atlases/SpriteInfo.json")
+        # print(files)
         categories = spriteHandler.loadSpriteInfo(files)
         self.listWidget_2.clear()
         self.listWidget_2.addItems(categories)
@@ -99,10 +101,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         for item in spriteHandler.categories:
             if spriteHandler.categories[item]:
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setBackground(
-                    greenBrush
-                )
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setIcon(
+                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
+                    0
+                ].setBackground(greenBrush)
+                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
+                    0
+                ].setIcon(
                     QtGui.QIcon(
                         os.path.abspath(
                             os.path.join(
@@ -112,11 +116,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     )
                 )
             else:
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setBackground(
-                    redBrush
-                )
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[0].setIcon(
-                    QtGui.QIcon(os.path.abspath(
+                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
+                    0
+                ].setBackground(redBrush)
+                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
+                    0
+                ].setIcon(
+                    QtGui.QIcon(
+                        os.path.abspath(
                             os.path.join(
                                 os.path.dirname(__file__), "resources/xicon.png"
                             )
@@ -353,10 +360,12 @@ class WizardDialog(QDialog, Ui_Dialog):
                         ]
                     ],
                     key=path.getmtime,
-                    reverse=True
+                    reverse=True,
                 )
                 file = timeSort[0]
-                i = spriteHandler.spritePath.index([x for x in spriteHandler.spritePath if x in file][0])
+                i = spriteHandler.spritePath.index(
+                    [x for x in spriteHandler.spritePath if x in file][0]
+                )
                 im = Image.open(file)
                 im = im.crop(
                     (
@@ -374,7 +383,9 @@ class WizardDialog(QDialog, Ui_Dialog):
                 if newHash != item:
                     spriteHandler.copyMain(spriteHandler.spritePath[i])
         self.updateCompletion()
-        window.infoBox.appendPlainText("All changed sprites have been copied to their duplicates.")
+        window.infoBox.appendPlainText(
+            "All changed sprites have been copied to their duplicates."
+        )
 
     def updatePreview(self, current, previous):
         if current != None:
@@ -412,14 +423,20 @@ class WizardDialog(QDialog, Ui_Dialog):
             sortedDuplicates = spriteHandler.sortByHash(index, currentItem)
             if spriteHandler.checkCompletion(sortedDuplicates, currentItem):
                 item.setBackground(greenBrush)
-                item.setIcon(QtGui.QIcon(os.path.abspath(
+                item.setIcon(
+                    QtGui.QIcon(
+                        os.path.abspath(
                             os.path.join(
                                 os.path.dirname(__file__), "resources/checkicon.png"
                             )
-                        )))
+                        )
+                    )
+                )
             else:
                 item.setBackground(redBrush)
-                item.setIcon(QtGui.QIcon(os.path.abspath(
+                item.setIcon(
+                    QtGui.QIcon(
+                        os.path.abspath(
                             os.path.join(
                                 os.path.dirname(__file__), "resources/xicon.png"
                             )

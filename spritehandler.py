@@ -43,8 +43,11 @@ class spriteHandler:
                 if x not in spriteCollectionList
             ]
             categories += spriteCollectionList
+
         finalCategories = []
         [finalCategories.append(x) for x in categories if x not in finalCategories]
+        print("here")
+        print(finalCategories)
         spriteHandler.categories.clear()
         for category in finalCategories:
             spriteHandler.categories[category] = True
@@ -109,11 +112,11 @@ class spriteHandler:
             if spriteHandler.categories[spriteCollectionList[j]]:
                 maxW = 0
                 maxH = 0
-                #print(len(spriteCollectionList))
-                #print(spriteCollectionList[j])
+                # print(len(spriteCollectionList))
+                # print(spriteCollectionList[j])
                 for i in range(0, len(spriteHandler.spriteIDs)):
-                    #print(spriteHandler.spriteCollection[i])
-                    #print(spriteCollectionList[j])
+                    # print(spriteHandler.spriteCollection[i])
+                    # print(spriteCollectionList[j])
                     if spriteHandler.spriteCollection[i] == spriteCollectionList[j]:
                         if spriteHandler.spriteFlipped[i]:
                             maxW = max(
@@ -124,8 +127,8 @@ class spriteHandler:
                                 maxH,
                                 spriteHandler.spriteY[i] + spriteHandler.spriteW[i],
                             )
-                            #print("flipped:")
-                            #print(maxH)
+                            # print("flipped:")
+                            # print(maxH)
                         else:
                             maxW = max(
                                 maxW,
@@ -135,14 +138,14 @@ class spriteHandler:
                                 maxH,
                                 spriteHandler.spriteY[i],
                             )
-                            #print("not flipped:")
-                            #print(maxH)
-                #print(maxW)
-                #print(maxH)
+                            # print("not flipped:")
+                            # print(maxH)
+                # print(maxW)
+                # print(maxH)
                 maxW = 2 ** math.ceil(math.log2(maxW - 1))
                 maxH = 2 ** math.ceil(math.log2(maxH - 1))
-                #print(maxW)
-                #print(maxH)
+                # print(maxW)
+                # print(maxH)
 
                 out = Image.new("RGBA", (maxW, maxH), (0, 0, 0, 0))
 
@@ -196,29 +199,33 @@ class spriteHandler:
         duplicatesDict = json.load(open(filePath, "r"))
         keyList = list(duplicatesDict.keys())
         valueList = list(duplicatesDict.values())
-        # #print(valueList)
         for path in spriteHandler.spritePath:
-            groupOfDuplicates = [x for x in valueList if path in x][0]
-            loadedDuplicates = [
-                x for x in groupOfDuplicates if x in spriteHandler.spritePath
-            ]
-            # #print(groupOfDuplicates)
-            # #print(loadedDuplicates)
-            if not loadedDuplicates in spriteHandler.duplicatesList:
-                if len(loadedDuplicates) > 1:
-                    if animation in path or animation == "":
-                        spriteHandler.duplicatesHashList.append(
-                            keyList[valueList.index(groupOfDuplicates)]
-                        )
-                        spriteHandler.duplicatesList.append(loadedDuplicates)
-        # #print(spriteHandler.duplicatesList)
+            filteredValues = [x for x in valueList if path in x]
+            # print(filteredValues)
+            if len(filteredValues) != 0:
+                groupOfDuplicates = filteredValues[0]
+                loadedDuplicates = [
+                    x for x in groupOfDuplicates if x in spriteHandler.spritePath
+                ]
+                # #print(groupOfDuplicates)
+                # #print(loadedDuplicates)
+                if not loadedDuplicates in spriteHandler.duplicatesList:
+                    if len(loadedDuplicates) > 1:
+                        if animation in path or animation == "":
+                            spriteHandler.duplicatesHashList.append(
+                                keyList[valueList.index(groupOfDuplicates)]
+                            )
+                            spriteHandler.duplicatesList.append(loadedDuplicates)
+        # print(spriteHandler.duplicatesList)
 
     @staticmethod
     def copyMain(main):
-        #print(main)
-        #print(spriteHandler.duplicatesList)
-        groupOfDuplicates = copy.deepcopy([x for x in spriteHandler.duplicatesList if main in x][0])
-        #print(groupOfDuplicates)
+        # print(main)
+        # print(spriteHandler.duplicatesList)
+        groupOfDuplicates = copy.deepcopy(
+            [x for x in spriteHandler.duplicatesList if main in x][0]
+        )
+        # print(groupOfDuplicates)
         groupOfDuplicates.remove(main)
         mainIndex = spriteHandler.spritePath.index(main)
         mainImage = Image.open(spriteHandler.basepath + "/" + main)
@@ -248,7 +255,7 @@ class spriteHandler:
 
     @staticmethod
     def sortByHash(index, vanillaHash):
-        #print(spriteHandler.duplicatesList[index])
+        # print(spriteHandler.duplicatesList[index])
 
         def sortFunc(file):
             if file in spriteHandler.spritePath:
@@ -268,21 +275,21 @@ class spriteHandler:
                 )
                 imData = im.getdata()
                 newHash = hash(tuple(map(tuple, imData)))
-                #print(file)
-                #print(type(newHash))
-                #print(type(vanillaHash))
+                # print(file)
+                # print(type(newHash))
+                # print(type(vanillaHash))
                 if str(newHash) == vanillaHash:
-                    #print("equal")
+                    # print("equal")
                     return 1
                 else:
-                    #print("not equal")
+                    # print("not equal")
                     return 0
             else:
                 return 2
 
-        #print("sorted list")
-        #print(sorted(spriteHandler.duplicatesList[index], key=sortFunc))
-        #print("done sort")
+        # print("sorted list")
+        # print(sorted(spriteHandler.duplicatesList[index], key=sortFunc))
+        # print("done sort")
         return sorted(spriteHandler.duplicatesList[index], key=sortFunc)
 
     @staticmethod
@@ -301,11 +308,11 @@ class spriteHandler:
             )
             imData = im.getdata()
             newHash = hash(tuple(map(tuple, imData)))
-            #print(sprite)
-            #print(type(newHash))
-            #print(type(vanillaHash))
+            # print(sprite)
+            # print(type(newHash))
+            # print(type(vanillaHash))
             if str(newHash) == vanillaHash:
-                #print("equal")
+                # print("equal")
                 return 0
             else:
                 if customHash == "":
