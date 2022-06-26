@@ -14,7 +14,7 @@
    <string>Duplicate Sprite Manager</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/main/SheoIcon.ico</normaloff>:/main/SheoIcon.ico</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -112,11 +112,11 @@
    <sender>pushButton</sender>
    <signal>clicked()</signal>
    <receiver>Dialog</receiver>
-   <slot>selectMainCopy()</slot>
+   <slot>select_main_copy()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>816</x>
-     <y>597</y>
+     <x>828</x>
+     <y>595</y>
     </hint>
     <hint type="destinationlabel">
      <x>322</x>
@@ -131,8 +131,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1046</x>
-     <y>597</y>
+     <x>1044</x>
+     <y>595</y>
     </hint>
     <hint type="destinationlabel">
      <x>546</x>
@@ -144,7 +144,7 @@
    <sender>listWidget</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>Dialog</receiver>
-   <slot>updatePreview()</slot>
+   <slot>update_preview()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>539</x>
@@ -160,7 +160,7 @@
    <sender>duplicatesWidget</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>Dialog</receiver>
-   <slot>updateFrames()</slot>
+   <slot>update_frames()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>55</x>
@@ -176,7 +176,7 @@
    <sender>pushButton_2</sender>
    <signal>clicked()</signal>
    <receiver>Dialog</receiver>
-   <slot>autoreplaceAll()</slot>
+   <slot>autoreplace_all()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>896</x>
@@ -190,9 +190,9 @@
   </connection>
  </connections>
  <slots>
-  <slot>selectMainCopy()</slot>
-  <slot>updatePreview()</slot>
-  <slot>updateFrames()</slot>
-  <slot>autoreplaceAll()</slot>
+  <slot>select_main_copy()</slot>
+  <slot>update_preview()</slot>
+  <slot>update_frames()</slot>
+  <slot>autoreplace_all()</slot>
  </slots>
 </ui>

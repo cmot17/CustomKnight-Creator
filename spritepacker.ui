@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>805</width>
-    <height>603</height>
+    <width>1019</width>
+    <height>636</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>CustomKnight Creator</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/main/SheoIcon.ico</normaloff>:/main/SheoIcon.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -320,7 +320,7 @@
    <sender>pushButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>addJSON()</slot>
+   <slot>add_root_folder()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>87</x>
@@ -336,7 +336,7 @@
    <sender>pushButton_2</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>removeJSON()</slot>
+   <slot>remove_root_folder()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>169</x>
@@ -352,7 +352,7 @@
    <sender>pushButton_3</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>enableCategory()</slot>
+   <slot>enable_category()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>85</x>
@@ -368,7 +368,7 @@
    <sender>pushButton_4</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>disableCategory()</slot>
+   <slot>disable_category()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>166</x>
@@ -384,7 +384,7 @@
    <sender>pushButton_10</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>loadCategories()</slot>
+   <slot>load_categories()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>261</x>
@@ -400,7 +400,7 @@
    <sender>pushButton_11</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>loadAnimations()</slot>
+   <slot>load_animations()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>261</x>
@@ -416,7 +416,7 @@
    <sender>listWidget_3</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>MainWindow</receiver>
-   <slot>animationChanged()</slot>
+   <slot>animation_changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>528</x>
@@ -432,7 +432,7 @@
    <sender>listWidget_4</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>MainWindow</receiver>
-   <slot>spriteChanged()</slot>
+   <slot>sprite_changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>792</x>
@@ -448,7 +448,7 @@
    <sender>pushButton_8</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>packSprites()</slot>
+   <slot>pack_sprites()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>346</x>
@@ -464,7 +464,7 @@
    <sender>pushButton_9</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>chooseOutFolder()</slot>
+   <slot>choose_out_folder()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>460</x>
@@ -480,11 +480,11 @@
    <sender>pushButton_6</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>duplicateWizard()</slot>
+   <slot>duplicate_wizard()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>580</x>
-     <y>333</y>
+     <x>786</x>
+     <y>345</y>
     </hint>
     <hint type="destinationlabel">
      <x>267</x>
@@ -496,7 +496,7 @@
    <sender>pushButton_5</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>animationDuplicates()</slot>
+   <slot>animation_duplicates()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>441</x>
@@ -504,7 +504,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>383</x>
-     <y>658</y>
+     <y>635</y>
     </hint>
    </hints>
   </connection>
@@ -512,11 +512,11 @@
    <sender>playAnimationButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>playAnimation()</slot>
+   <slot>play_animation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>687</x>
-     <y>333</y>
+     <x>920</x>
+     <y>345</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
@@ -528,11 +528,11 @@
    <sender>animationFilter</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
-   <slot>filterAnimations()</slot>
+   <slot>filter_animations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>389</x>
-     <y>379</y>
+     <x>667</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>513</x>
@@ -544,11 +544,11 @@
    <sender>lineEdit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
-   <slot>updateOutputPath()</slot>
+   <slot>update_output_path()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>554</x>
-     <y>556</y>
+     <x>1004</x>
+     <y>593</y>
     </hint>
     <hint type="destinationlabel">
      <x>579</x>
@@ -560,11 +560,11 @@
    <sender>autoplayAnimation</sender>
    <signal>stateChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>updateAutoplay()</slot>
+   <slot>update_autoplay()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>731</x>
-     <y>321</y>
+     <x>1005</x>
+     <y>337</y>
     </hint>
     <hint type="destinationlabel">
      <x>765</x>
@@ -574,21 +574,21 @@
   </connection>
  </connections>
  <slots>
-  <slot>addJSON()</slot>
-  <slot>removeJSON()</slot>
-  <slot>enableCategory()</slot>
-  <slot>disableCategory()</slot>
-  <slot>loadCategories()</slot>
-  <slot>loadAnimations()</slot>
-  <slot>animationChanged()</slot>
-  <slot>spriteChanged()</slot>
-  <slot>packSprites()</slot>
-  <slot>chooseOutFolder()</slot>
-  <slot>duplicateWizard()</slot>
-  <slot>animationDuplicates()</slot>
-  <slot>playAnimation()</slot>
-  <slot>filterAnimations()</slot>
-  <slot>updateOutputPath()</slot>
-  <slot>updateAutoplay()</slot>
+  <slot>add_root_folder()</slot>
+  <slot>remove_root_folder()</slot>
+  <slot>enable_category()</slot>
+  <slot>disable_category()</slot>
+  <slot>load_categories()</slot>
+  <slot>load_animations()</slot>
+  <slot>animation_changed()</slot>
+  <slot>sprite_changed()</slot>
+  <slot>pack_sprites()</slot>
+  <slot>choose_out_folder()</slot>
+  <slot>duplicate_wizard()</slot>
+  <slot>animation_duplicates()</slot>
+  <slot>play_animation()</slot>
+  <slot>filter_animations()</slot>
+  <slot>update_output_path()</slot>
+  <slot>update_autoplay()</slot>
  </slots>
 </ui>

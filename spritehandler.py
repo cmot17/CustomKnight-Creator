@@ -1,284 +1,303 @@
+"""
+Handles sprite data, packing, and deduplication.
+"""
+
+import copy
 import json
 import math
-from PIL import Image
 import os
 import os.path
-from PyQt6.QtWidgets import *
-import copy
+from dataclasses import dataclass
+from pathlib import Path
+from typing import NamedTuple
+
+from PIL import Image
+
+# from PyQt6.QtWidgets import
 
 
-class spriteHandler:
-    dataArray = []
-    categories = {}
-    animationsList = []
+@dataclass
+class Sprite:
+    sprite_id: int
+    pos: NamedTuple
+    pos_r: NamedTuple
+    size: NamedTuple
+    flipped: bool
+    path: Path
+    collection: str
+
+
+class SpriteHandler:
+    dataArray: list[dict[str, list[str]]] = []
+    categories: dict[str, bool] = {}
+    animationsList: list[str] = []
     basepath = ""
     savedOutputFolder = ""
 
-    spriteIDs = []
-    spriteX = []
-    spriteY = []
-    spriteXR = []
-    spriteYR = []
-    spriteW = []
-    spriteH = []
-    spriteFlipped = []
-    spritePath = []
-    spriteCollection = []
+    sprites: list[Sprite] = []
 
-    duplicatesHashList = []
-    duplicatesList = []
+    spriteIDs: list[int] = []
+    spriteX: list[int] = []
+    spriteY: list[int] = []
+    spriteXR: list[int] = []
+    spriteYR: list[int] = []
+    spriteW: list[int] = []
+    spriteH: list[int] = []
+    spriteFlipped: list[bool] = []
+    spritePath: list[str] = []
+    spriteCollection: list[str] = []
+
+    duplicatesHashList: list[str] = []
+    duplicatesList: list[list[str]] = []
 
     @staticmethod
-    def loadSpriteInfo(files):
-        categories = []
-        spriteHandler.dataArray = []
+    def load_sprite_info(files: list[str]) -> list[str]:
+        categories: list[str] = []
+        SpriteHandler.dataArray = []
         for file in files:
-            io = open(file, "r")
-            data = json.load(io)
-            spriteHandler.dataArray.append(data)
-            spriteCollectionList = []
-            [
-                spriteCollectionList.append(x)
-                for x in data["scollectionname"]
-                if x not in spriteCollectionList
-            ]
-            categories += spriteCollectionList
+            data = json.load(open(file, "r", encoding="utf-8"))
+            SpriteHandler.dataArray.append(data)
+            sprite_collection_list = list(
+                dict.fromkeys(data["scollectionname"])
+            )  # remove duplicates
+            categories += sprite_collection_list
 
-        finalCategories = []
-        [finalCategories.append(x) for x in categories if x not in finalCategories]
-        print("here")
-        print(finalCategories)
-        spriteHandler.categories.clear()
-        for category in finalCategories:
-            spriteHandler.categories[category] = True
-        return finalCategories
+        final_categories = list(dict.fromkeys(categories))  # remove duplicates
+        # print(finalCategories)
+        SpriteHandler.categories.clear()
+        for category in final_categories:
+            SpriteHandler.categories[category] = True
+        return final_categories
 
     @staticmethod
-    def loadAnimations(filter):
-        spriteHandler.spriteIDs = []
-        spriteHandler.spriteX = []
-        spriteHandler.spriteY = []
-        spriteHandler.spriteXR = []
-        spriteHandler.spriteYR = []
-        spriteHandler.spriteW = []
-        spriteHandler.spriteH = []
-        spriteHandler.spriteFlipped = []
-        spriteHandler.spritePath = []
-        spriteHandler.spriteCollection = []
-        for data in spriteHandler.dataArray:
-            spriteHandler.spriteIDs += data["sid"]
-            spriteHandler.spriteX += data["sx"]
-            spriteHandler.spriteY += data["sy"]
-            spriteHandler.spriteXR += data["sxr"]
-            spriteHandler.spriteYR += data["syr"]
-            spriteHandler.spriteW += data["swidth"]
-            spriteHandler.spriteH += data["sheight"]
-            spriteHandler.spriteFlipped += data["sfilpped"]
-            spriteHandler.spritePath += data["spath"]
-            spriteHandler.spriteCollection += data["scollectionname"]
-        for i in reversed(range(0, len(spriteHandler.spriteCollection))):
-            if (not spriteHandler.categories[spriteHandler.spriteCollection[i]]) or (
-                str.casefold(filter) not in str.casefold(spriteHandler.spritePath[i])
+    def load_animations(filter_str: str) -> list[str]:
+        SpriteHandler.spriteIDs.clear()
+        SpriteHandler.spriteX.clear()
+        SpriteHandler.spriteY.clear()
+        SpriteHandler.spriteXR.clear()
+        SpriteHandler.spriteYR.clear()
+        SpriteHandler.spriteW.clear()
+        SpriteHandler.spriteH.clear()
+        SpriteHandler.spriteFlipped.clear()
+        SpriteHandler.spritePath.clear()
+        SpriteHandler.spriteCollection.clear()
+
+        for data in SpriteHandler.dataArray:
+            SpriteHandler.spriteIDs += [int(x) for x in data["sid"]]
+            SpriteHandler.spriteX += [int(x) for x in data["sx"]]
+            SpriteHandler.spriteY += [int(x) for x in data["sy"]]
+            SpriteHandler.spriteXR += [int(x) for x in data["sxr"]]
+            SpriteHandler.spriteYR += [int(x) for x in data["syr"]]
+            SpriteHandler.spriteW += [int(x) for x in data["swidth"]]
+            SpriteHandler.spriteH += [int(x) for x in data["sheight"]]
+            SpriteHandler.spriteFlipped += [
+                bool(x) for x in data["sfilpped"]
+            ]  # there is a type in the exported json files
+            SpriteHandler.spritePath += data["spath"]
+            SpriteHandler.spriteCollection += data["scollectionname"]
+        for i in reversed(range(0, len(SpriteHandler.spriteCollection))):
+            if (not SpriteHandler.categories[SpriteHandler.spriteCollection[i]]) or (
+                str.casefold(filter_str)
+                not in str.casefold(SpriteHandler.spritePath[i])
             ):
-                del spriteHandler.spriteIDs[i]
-                del spriteHandler.spriteX[i]
-                del spriteHandler.spriteY[i]
-                del spriteHandler.spriteXR[i]
-                del spriteHandler.spriteYR[i]
-                del spriteHandler.spriteW[i]
-                del spriteHandler.spriteH[i]
-                del spriteHandler.spriteFlipped[i]
-                del spriteHandler.spritePath[i]
-                del spriteHandler.spriteCollection[i]
+                del SpriteHandler.spriteIDs[i]
+                del SpriteHandler.spriteX[i]
+                del SpriteHandler.spriteY[i]
+                del SpriteHandler.spriteXR[i]
+                del SpriteHandler.spriteYR[i]
+                del SpriteHandler.spriteW[i]
+                del SpriteHandler.spriteH[i]
+                del SpriteHandler.spriteFlipped[i]
+                del SpriteHandler.spritePath[i]
+                del SpriteHandler.spriteCollection[i]
         animations = []
-        for path in spriteHandler.spritePath:
+        for path in SpriteHandler.spritePath:
             if os.path.basename(os.path.dirname(path)) not in animations:
                 animations.append(os.path.basename(os.path.dirname(path)))
-        spriteHandler.animationsList = copy.copy(animations)
+        SpriteHandler.animationsList = copy.copy(animations)
         return animations
 
     @staticmethod
-    def loadSprites(animation):
+    def load_sprites(animation: str) -> list[str]:
         sprites = []
-        for path in spriteHandler.spritePath:
+        for path in SpriteHandler.spritePath:
             if os.path.basename(os.path.dirname(path)) == animation:
                 sprites.append(os.path.basename(path))
         return sprites
 
     @staticmethod
-    def packSprites(outputDir):
-        spriteCollectionList = list(spriteHandler.categories.keys())
-        for j in range(0, len(spriteCollectionList)):
-            if spriteHandler.categories[spriteCollectionList[j]]:
-                maxW = 0
-                maxH = 0
+    def pack_sprites(output_dir: str) -> bool:
+        sprite_collection_list = list(SpriteHandler.categories.keys())
+        for category in enumerate(sprite_collection_list):
+            if SpriteHandler.categories[category[1]]:
+                max_width = 0
+                max_height = 0
                 # print(len(spriteCollectionList))
                 # print(spriteCollectionList[j])
-                for i in range(0, len(spriteHandler.spriteIDs)):
+                for i in range(0, len(SpriteHandler.spriteIDs)):
                     # print(spriteHandler.spriteCollection[i])
                     # print(spriteCollectionList[j])
-                    if spriteHandler.spriteCollection[i] == spriteCollectionList[j]:
-                        if spriteHandler.spriteFlipped[i]:
-                            maxW = max(
-                                maxW,
-                                spriteHandler.spriteX[i] + spriteHandler.spriteH[i],
+                    if SpriteHandler.spriteCollection[i] == category[1]:
+                        if SpriteHandler.spriteFlipped[i]:
+                            max_width = max(
+                                max_width,
+                                SpriteHandler.spriteX[i] + SpriteHandler.spriteH[i],
                             )
-                            maxH = max(
-                                maxH,
-                                spriteHandler.spriteY[i] + spriteHandler.spriteW[i],
+                            max_height = max(
+                                max_height,
+                                SpriteHandler.spriteY[i] + SpriteHandler.spriteW[i],
                             )
                             # print("flipped:")
                             # print(maxH)
                         else:
-                            maxW = max(
-                                maxW,
-                                spriteHandler.spriteX[i] + spriteHandler.spriteW[i],
+                            max_width = max(
+                                max_width,
+                                SpriteHandler.spriteX[i] + SpriteHandler.spriteW[i],
                             )
-                            maxH = max(
-                                maxH,
-                                spriteHandler.spriteY[i],
+                            max_height = max(
+                                max_height,
+                                SpriteHandler.spriteY[i],
                             )
                             # print("not flipped:")
                             # print(maxH)
                 # print(maxW)
                 # print(maxH)
-                maxW = 2 ** math.ceil(math.log2(maxW - 1))
-                maxH = 2 ** math.ceil(math.log2(maxH - 1))
+                max_width = 2 ** math.ceil(math.log2(max_width - 1))
+                max_height = 2 ** math.ceil(math.log2(max_height - 1))
                 # print(maxW)
                 # print(maxH)
 
-                out = Image.new("RGBA", (maxW, maxH), (0, 0, 0, 0))
+                out = Image.new("RGBA", (max_width, max_height), (0, 0, 0, 0))
 
-                for i in range(0, len(spriteHandler.spriteIDs)):
-                    if spriteHandler.spriteCollection[i] == spriteCollectionList[j]:
-                        im = Image.open(
-                            spriteHandler.basepath + "/" + spriteHandler.spritePath[i]
+                for i in range(0, len(SpriteHandler.spriteIDs)):
+                    if SpriteHandler.spriteCollection[i] == category[1]:
+                        image = Image.open(
+                            SpriteHandler.basepath + "/" + SpriteHandler.spritePath[i]
                         )
-                        im = im.crop(
+                        image = image.crop(
                             (
-                                spriteHandler.spriteXR[i],
-                                im.size[1]
-                                - spriteHandler.spriteYR[i]
-                                - spriteHandler.spriteH[i],
-                                spriteHandler.spriteXR[i] + spriteHandler.spriteW[i],
-                                im.size[1] - spriteHandler.spriteYR[i],
+                                SpriteHandler.spriteXR[i],
+                                image.size[1]
+                                - SpriteHandler.spriteYR[i]
+                                - SpriteHandler.spriteH[i],
+                                SpriteHandler.spriteXR[i] + SpriteHandler.spriteW[i],
+                                image.size[1] - SpriteHandler.spriteYR[i],
                             )
                         )
-                        if spriteHandler.spriteFlipped[i] == True:
-                            x = spriteHandler.spriteX[i]
-                            y = (
+                        if SpriteHandler.spriteFlipped[i]:
+                            x_pos = SpriteHandler.spriteX[i]
+                            y_pos = (
                                 out.size[1]
-                                - spriteHandler.spriteY[i]
-                                - spriteHandler.spriteW[i]
+                                - SpriteHandler.spriteY[i]
+                                - SpriteHandler.spriteW[i]
                             )
                         else:
-                            x = spriteHandler.spriteX[i]
-                            y = (
+                            x_pos = SpriteHandler.spriteX[i]
+                            y_pos = (
                                 out.size[1]
-                                - spriteHandler.spriteY[i]
-                                - spriteHandler.spriteH[i]
+                                - SpriteHandler.spriteY[i]
+                                - SpriteHandler.spriteH[i]
                             )
 
-                        if spriteHandler.spriteFlipped[i]:
-                            im = im.rotate(90, expand=True)
-                            im = im.transpose(Image.FLIP_LEFT_RIGHT)
+                        if SpriteHandler.spriteFlipped[i]:
+                            image = image.rotate(90, expand=True)
+                            image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
-                        out.paste(im, (x, y))
+                        out.paste(image, (x_pos, y_pos))
                 try:
-                    out.save(outputDir + "/" + spriteCollectionList[j] + ".png")
+                    out.save(output_dir + "/" + category[1] + ".png")
                 except OSError:
                     return False
+        return True
 
     @staticmethod
-    def loadDuplicates(animation):
-        spriteHandler.duplicatesHashList = []
-        spriteHandler.duplicatesList = []
-        filePath = os.path.abspath(
+    def load_duplicates(animation: str) -> None:
+        SpriteHandler.duplicatesHashList = []
+        SpriteHandler.duplicatesList = []
+        file_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "resources/duplicatedata.json")
         )
-        duplicatesDict = json.load(open(filePath, "r"))
-        keyList = list(duplicatesDict.keys())
-        valueList = list(duplicatesDict.values())
-        for path in spriteHandler.spritePath:
-            filteredValues = [x for x in valueList if path in x]
-            # print(filteredValues)
-            if len(filteredValues) != 0:
-                groupOfDuplicates = filteredValues[0]
-                loadedDuplicates = [
-                    x for x in groupOfDuplicates if x in spriteHandler.spritePath
+        duplicates_dict = json.load(open(file_path, "r", encoding="utf-8"))
+        key_list = list(duplicates_dict.keys())
+        value_list = list(duplicates_dict.values())
+        for path in SpriteHandler.spritePath:
+            filtered_values = [x for x in value_list if path in x]
+            # print(filtered_values)
+            if len(filtered_values) != 0:
+                group_of_duplicates = filtered_values[0]
+                loaded_duplicates = [
+                    x for x in group_of_duplicates if x in SpriteHandler.spritePath
                 ]
                 # #print(groupOfDuplicates)
                 # #print(loadedDuplicates)
-                if not loadedDuplicates in spriteHandler.duplicatesList:
-                    if len(loadedDuplicates) > 1:
+                if not loaded_duplicates in SpriteHandler.duplicatesList:
+                    if len(loaded_duplicates) > 1:
                         if animation in path or animation == "":
-                            spriteHandler.duplicatesHashList.append(
-                                keyList[valueList.index(groupOfDuplicates)]
+                            SpriteHandler.duplicatesHashList.append(
+                                key_list[value_list.index(group_of_duplicates)]
                             )
-                            spriteHandler.duplicatesList.append(loadedDuplicates)
+                            SpriteHandler.duplicatesList.append(loaded_duplicates)
         # print(spriteHandler.duplicatesList)
 
     @staticmethod
-    def copyMain(main):
+    def copy_main(main: str) -> None:
         # print(main)
         # print(spriteHandler.duplicatesList)
-        groupOfDuplicates = copy.deepcopy(
-            [x for x in spriteHandler.duplicatesList if main in x][0]
+        group_of_duplicates = copy.deepcopy(
+            [x for x in SpriteHandler.duplicatesList if main in x][0]
         )
         # print(groupOfDuplicates)
-        groupOfDuplicates.remove(main)
-        mainIndex = spriteHandler.spritePath.index(main)
-        mainImage = Image.open(spriteHandler.basepath + "/" + main)
-        mainImage = mainImage.crop(
+        group_of_duplicates.remove(main)
+        main_index = SpriteHandler.spritePath.index(main)
+        main_image = Image.open(SpriteHandler.basepath + "/" + main)
+        main_image = main_image.crop(
             (
-                spriteHandler.spriteXR[mainIndex],
-                mainImage.size[1]
-                - spriteHandler.spriteYR[mainIndex]
-                - spriteHandler.spriteH[mainIndex],
-                spriteHandler.spriteXR[mainIndex] + spriteHandler.spriteW[mainIndex],
-                mainImage.size[1] - spriteHandler.spriteYR[mainIndex],
+                SpriteHandler.spriteXR[main_index],
+                main_image.size[1]
+                - SpriteHandler.spriteYR[main_index]
+                - SpriteHandler.spriteH[main_index],
+                SpriteHandler.spriteXR[main_index] + SpriteHandler.spriteW[main_index],
+                main_image.size[1] - SpriteHandler.spriteYR[main_index],
             )
         )
-        for image in groupOfDuplicates:
-            duplicateIndex = spriteHandler.spritePath.index(image)
-            duplicateImage = Image.open(spriteHandler.basepath + "/" + image)
-            duplicateImage.paste(
-                mainImage,
+        for image in group_of_duplicates:
+            duplicate_index = SpriteHandler.spritePath.index(image)
+            duplicate_image = Image.open(SpriteHandler.basepath + "/" + image)
+            duplicate_image.paste(
+                main_image,
                 (
-                    spriteHandler.spriteXR[duplicateIndex],
-                    duplicateImage.size[1]
-                    - spriteHandler.spriteYR[duplicateIndex]
-                    - spriteHandler.spriteH[duplicateIndex],
+                    SpriteHandler.spriteXR[duplicate_index],
+                    duplicate_image.size[1]
+                    - SpriteHandler.spriteYR[duplicate_index]
+                    - SpriteHandler.spriteH[duplicate_index],
                 ),
             )
-            duplicateImage.save(spriteHandler.basepath + "/" + image)
+            duplicate_image.save(SpriteHandler.basepath + "/" + image)
 
     @staticmethod
-    def sortByHash(index, vanillaHash):
+    def sort_by_hash(index: int, vanilla_hash: str) -> list[str]:
         # print(spriteHandler.duplicatesList[index])
 
-        def sortFunc(file):
-            if file in spriteHandler.spritePath:
-                i = spriteHandler.spritePath.index(file)
-                im = Image.open(
-                    spriteHandler.basepath + "/" + spriteHandler.spritePath[i]
-                )
-                im = im.crop(
+        def sort_func(file: str) -> int:
+            if file in SpriteHandler.spritePath:
+                i = SpriteHandler.spritePath.index(file)
+                image = Image.open(SpriteHandler.basepath + "/" + file)
+                image = image.crop(
                     (
-                        spriteHandler.spriteXR[i],
-                        im.size[1]
-                        - spriteHandler.spriteYR[i]
-                        - spriteHandler.spriteH[i],
-                        spriteHandler.spriteXR[i] + spriteHandler.spriteW[i],
-                        im.size[1] - spriteHandler.spriteYR[i],
+                        SpriteHandler.spriteXR[i],
+                        image.size[1]
+                        - SpriteHandler.spriteYR[i]
+                        - SpriteHandler.spriteH[i],
+                        SpriteHandler.spriteXR[i] + SpriteHandler.spriteW[i],
+                        image.size[1] - SpriteHandler.spriteYR[i],
                     )
                 )
-                imData = im.getdata()
-                newHash = hash(tuple(map(tuple, imData)))
+                im_data = image.getdata()
+                new_hash = hash(tuple(map(tuple, im_data)))
                 # print(file)
                 # print(type(newHash))
                 # print(type(vanillaHash))
-                if str(newHash) == vanillaHash:
+                if str(new_hash) == vanilla_hash:
                     # print("equal")
                     return 1
                 else:
@@ -290,34 +309,38 @@ class spriteHandler:
         # print("sorted list")
         # print(sorted(spriteHandler.duplicatesList[index], key=sortFunc))
         # print("done sort")
-        return sorted(spriteHandler.duplicatesList[index], key=sortFunc)
+        return sorted(SpriteHandler.duplicatesList[index], key=sort_func)
 
     @staticmethod
-    def checkCompletion(duplicates, vanillaHash):
-        customHash = ""
+    def check_completion(duplicates: list[str], vanilla_hash: str) -> int:
+        custom_hash = ""
         for sprite in duplicates:
-            i = spriteHandler.spritePath.index(sprite)
-            im = Image.open(spriteHandler.basepath + "/" + spriteHandler.spritePath[i])
-            im = im.crop(
+            i = SpriteHandler.spritePath.index(sprite)
+            image = Image.open(
+                SpriteHandler.basepath + "/" + SpriteHandler.spritePath[i]
+            )
+            image = image.crop(
                 (
-                    spriteHandler.spriteXR[i],
-                    im.size[1] - spriteHandler.spriteYR[i] - spriteHandler.spriteH[i],
-                    spriteHandler.spriteXR[i] + spriteHandler.spriteW[i],
-                    im.size[1] - spriteHandler.spriteYR[i],
+                    SpriteHandler.spriteXR[i],
+                    image.size[1]
+                    - SpriteHandler.spriteYR[i]
+                    - SpriteHandler.spriteH[i],
+                    SpriteHandler.spriteXR[i] + SpriteHandler.spriteW[i],
+                    image.size[1] - SpriteHandler.spriteYR[i],
                 )
             )
-            imData = im.getdata()
-            newHash = hash(tuple(map(tuple, imData)))
+            im_data = image.getdata()
+            new_hash = hash(tuple(map(tuple, im_data)))
             # print(sprite)
             # print(type(newHash))
             # print(type(vanillaHash))
-            if str(newHash) == vanillaHash:
+            if str(new_hash) == vanilla_hash:
                 # print("equal")
                 return 0
             else:
-                if customHash == "":
-                    customHash = str(newHash)
+                if custom_hash == "":
+                    custom_hash = str(new_hash)
                 else:
-                    if customHash != str(newHash):
+                    if custom_hash != str(new_hash):
                         return 0
         return 1

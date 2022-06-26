@@ -1,27 +1,42 @@
+"""
+Main file handling UI and assorted logic.
+"""
+
+import json
 import os
 import sys
-import json
-
-from spritehandler import spriteHandler
-from PyQt6 import QtGui, QtCore
-from PyQt6.QtWidgets import *
+from os import makedirs, path
 from pathlib import Path
-from os import path, makedirs
-from PIL import Image
+from typing import Optional
 
-from spritepacker_ui import Ui_MainWindow
+from PIL import Image
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QFileDialog,
+    QListWidgetItem,
+    QMainWindow,
+    QMessageBox,
+)
+
 from duplicatewizard_ui import Ui_Dialog
+from spritehandler import SpriteHandler
+from spritepacker_ui import Ui_MainWindow
 
 QtCore.QDir.addSearchPath("resources", "resources")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, *args, obj=None, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
-        self.setupUi(self)
-        self.recoverSavedState()
 
-    def addJSON(self, checked):
+    rootFolders: list[Path] = []
+
+    def __init__(self) -> None:
+        super(MainWindow, self).__init__()
+        self.setupUi(self)
+        self.recover_saved_state()
+
+    def add_root_folder(self) -> None:
         fname = ""
         fname = QFileDialog.getExistingDirectory(
             self,
@@ -30,83 +45,88 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QFileDialog.Option.ShowDirsOnly,
         )
         fname += "/0.Atlases/SpriteInfo.json"
-        # print("fname:")
+        # print("fname: ")
         # print(fname)
         if fname != "/0.Atlases/SpriteInfo.json":
             if not self.listWidget.findItems(fname, QtCore.Qt.MatchFlag.MatchExactly):
-                if self.listWidget.item(0) != None:
-                    if str(Path(fname).parents[2]) == spriteHandler.basepath:
+                if self.listWidget.item(0) is not None:
+                    if str(Path(fname).parents[2]) == SpriteHandler.basepath:
                         self.listWidget.addItem(
                             QListWidgetItem(str(Path(fname).parents[1]))
                         )
-                        self.updateSavedState()
+                        self.update_saved_state()
                     else:
-                        warningMessage = QMessageBox.warning(
+                        QMessageBox.warning(
                             window,
                             "Inconsistent Base Path",
-                            "Inconsistent Base Path:\nPlease make sure all of your top level sprite folders are in the same directory. (For example, the Knight and Spells Anim folders should be in the same folder)",
+                            "Inconsistent Base Path:\n"
+                            "Please make sure all of your top level sprite"
+                            " folders are in the same directory."
+                            "(For example, the Knight and Spells Anim"
+                            " folders should be in the same folder)",
                         )
                 else:
-                    spriteHandler.basepath = str(Path(fname).parents[2])
+                    SpriteHandler.basepath = str(Path(fname).parents[2])
                     # print("basepath:")
                     # print(spriteHandler.basepath)
                     self.listWidget.addItem(
                         QListWidgetItem(str(Path(fname).parents[1]))
                     )
-                    self.updateSavedState()
+                    self.update_saved_state()
             else:
-                warningMessage = QMessageBox.warning(
+                QMessageBox.warning(
                     window,
                     "Duplicate File Selected",
                     "Duplicate File Selected:\nPlease select a JSON file not already in the list",
                 )
 
-    def removeJSON(self, checked):
+    def remove_root_folder(self) -> None:
         self.listWidget.takeItem(self.listWidget.currentRow())
-        self.updateSavedState()
+        self.update_saved_state()
 
-    def enableCategory(self, checked):
-        if self.listWidget_2.currentItem() != None:
+    def enable_category(self) -> None:
+        if self.listWidget_2.currentItem() is not None:
             for category in self.listWidget_2.selectedItems():
-                categoryID = category.text()
-                spriteHandler.categories[categoryID] = True
-            self.updateEnabled()
+                category_id = category.text()
+                SpriteHandler.categories[category_id] = True
+            self.update_enabled()
             # print(spriteHandler.categories)
 
-    def disableCategory(self, checked):
-        if self.listWidget_2.currentItem() != None:
+    def disable_category(self) -> None:
+        if self.listWidget_2.currentItem() is not None:
             for category in self.listWidget_2.selectedItems():
-                categoryID = category.text()
-                spriteHandler.categories[categoryID] = False
-            self.updateEnabled()
+                category_id = category.text()
+                SpriteHandler.categories[category_id] = False
+            self.update_enabled()
             # print(spriteHandler.categories)
 
-    def loadCategories(self, checked):
+    def load_categories(self) -> None:
         files = []
         for i in range(self.listWidget.count()):
             files.append(self.listWidget.item(i).text() + "/0.Atlases/SpriteInfo.json")
         # print(files)
-        categories = spriteHandler.loadSpriteInfo(files)
+        categories = SpriteHandler.load_sprite_info(files)
         self.listWidget_2.clear()
         self.listWidget_2.addItems(categories)
-        self.updateEnabled()
+        self.update_enabled()
         self.infoBox.appendPlainText("Categories loaded.")
 
-    def updateEnabled(self):
-        greenBrush = QtGui.QBrush(
+    def update_enabled(self) -> None:
+        green_brush = QtGui.QBrush(
             QtCore.Qt.GlobalColor.green, QtCore.Qt.BrushStyle.Dense4Pattern
         )
-        redBrush = QtGui.QBrush(
+        red_brush = QtGui.QBrush(
             QtCore.Qt.GlobalColor.red, QtCore.Qt.BrushStyle.Dense4Pattern
         )
-        for item in spriteHandler.categories:
-            if spriteHandler.categories[item]:
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
-                    0
-                ].setBackground(greenBrush)
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
-                    0
-                ].setIcon(
+        for category in SpriteHandler.categories.items():
+            # category[0] is the category name and category[1] is the enabled status
+            if category[1]:
+                self.listWidget_2.findItems(
+                    category[0], QtCore.Qt.MatchFlag.MatchExactly
+                )[0].setBackground(green_brush)
+                self.listWidget_2.findItems(
+                    category[0], QtCore.Qt.MatchFlag.MatchExactly
+                )[0].setIcon(
                     QtGui.QIcon(
                         os.path.abspath(
                             os.path.join(
@@ -116,12 +136,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     )
                 )
             else:
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
-                    0
-                ].setBackground(redBrush)
-                self.listWidget_2.findItems(item, QtCore.Qt.MatchFlag.MatchExactly)[
-                    0
-                ].setIcon(
+                self.listWidget_2.findItems(
+                    category[0], QtCore.Qt.MatchFlag.MatchExactly
+                )[0].setBackground(red_brush)
+                self.listWidget_2.findItems(
+                    category[0], QtCore.Qt.MatchFlag.MatchExactly
+                )[0].setIcon(
                     QtGui.QIcon(
                         os.path.abspath(
                             os.path.join(
@@ -130,43 +150,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         )
                     )
                 )
-        self.updateSavedState()
+        self.update_saved_state()
 
-    def loadAnimations(self, checked):
-        animations = spriteHandler.loadAnimations("")
+    def load_animations(self) -> None:
+        animations = SpriteHandler.load_animations("")
         self.listWidget_3.clear()
         self.listWidget_3.addItems(animations)
         self.listWidget_4.clear()
         self.listWidget_3.setCurrentRow(0)
         self.infoBox.appendPlainText("Animations loaded.")
 
-    def animationChanged(self, current, previous):
-        if current != None:
+    def animation_changed(
+        self, current: Optional[QListWidgetItem], _previous: Optional[QListWidgetItem]
+    ) -> None:
+        if current is not None:
             self.listWidget_4.clear()
-            self.listWidget_4.addItems(spriteHandler.loadSprites(current.text()))
+            self.listWidget_4.addItems(SpriteHandler.load_sprites(current.text()))
             self.listWidget_4.setCurrentRow(0)
 
-    def spriteChanged(self, current, previous):
-        if current != None:
-            path = next(x for x in spriteHandler.spritePath if current.text() in x)
-            self.updatePreview(path)
+    def sprite_changed(
+        self, current: Optional[QListWidgetItem], _previous: Optional[QListWidgetItem]
+    ) -> None:
+        if current is not None:
+            self.update_preview(
+                next(x for x in SpriteHandler.spritePath if current.text() in x)
+            )
 
-    def packSprites(self, checked):
+    def pack_sprites(self) -> None:
         if path.isdir(self.lineEdit.text()) and self.lineEdit.text() != "":
-            spriteHandler.loadDuplicates("")
+            SpriteHandler.load_duplicates("")
             completion = True
-            for item in spriteHandler.duplicatesHashList:
-                currentItem = item
-                index = spriteHandler.duplicatesHashList.index(currentItem)
-                sortedDuplicates = spriteHandler.sortByHash(index, currentItem)
-                if not spriteHandler.checkCompletion(sortedDuplicates, currentItem):
+            for item in SpriteHandler.duplicatesHashList:
+                current_item = item
+                index = SpriteHandler.duplicatesHashList.index(current_item)
+                sorted_duplicates = SpriteHandler.sort_by_hash(index, current_item)
+                if not SpriteHandler.check_completion(sorted_duplicates, current_item):
                     completion = False
                     break
             if not completion:
                 button = QMessageBox.warning(
                     window,
                     "Some duplicate sprites are not modified",
-                    "Some duplicate sprites are not modified:\nThis means that a group of duplicates either is all vanilla, or the non-vanilla sprites do not match. You can continue if you intentionally left duplicate sprites different / vanilla. Would you like to continue packing?",
+                    "Some duplicate sprites are not modified:\n"
+                    "This means that a group of duplicates either is all vanilla,"
+                    "or the non-vanilla sprites do not match. "
+                    "You can continue if you intentionally left duplicate sprites different / "
+                    "vanilla. Would you like to continue packing?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                     defaultButton=QMessageBox.StandardButton.No,
                 )
@@ -178,26 +207,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.infoBox.appendPlainText("Packing sprites...")
             self.infoBox.repaint()
             self.animationFilter.setText("")
-            self.filterAnimations()
-            error = spriteHandler.packSprites(self.lineEdit.text())
-            if error == False:
+            self.filter_animations()
+            error = SpriteHandler.pack_sprites(self.lineEdit.text())
+            if not error:
                 QMessageBox.warning(
                     window,
                     "Error Writing Files",
-                    "Error Writing Files:\nPlease make sure none of the output files are currently open",
+                    "Error Writing Files:\n"
+                    "Please make sure none of the output files are currently open",
                 )
                 self.infoBox.appendPlainText("Packing failed: file in use.")
             else:
                 self.infoBox.appendPlainText("Done packing.")
-            self.updateSavedState()
+            self.update_saved_state()
         else:
             QMessageBox.warning(
                 window,
                 "Invalid Output Path",
-                "Invalid Output Path:\nPlease select a valid directory to output packed sprites into",
+                "Invalid Output Path:\n"
+                "Please select a valid directory to output packed sprites into",
             )
 
-    def chooseOutFolder(self, checked):
+    def choose_out_folder(self) -> None:
         dirname = QFileDialog.getExistingDirectory(
             self,
             "Select a folder to output packed sprites into",
@@ -207,111 +238,111 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEdit.setText(dirname)
         self.infoBox.appendPlainText("Output folder selected.")
 
-    def updateOutputPath(self, newPath):
+    def update_output_path(self, _new_path: str) -> None:
         # print("newpath:")
-        # print(newPath)
-        spriteHandler.savedOutputFolder = self.lineEdit.text()
-        self.updateSavedState()
+        # print(new_path)
+        SpriteHandler.savedOutputFolder = self.lineEdit.text()
+        self.update_saved_state()
 
-    def updatePreview(self, path):
-        width = self.spritePreview.width()
-        height = self.spritePreview.height()
-        pixmap = QtGui.QPixmap(spriteHandler.basepath + "/" + path)
+    def update_preview(self, new_path: str) -> None:
+        # width = self.spritePreview.width()
+        # height = self.spritePreview.height()
+        pixmap = QtGui.QPixmap(SpriteHandler.basepath + "/" + new_path)
         # pixmap = pixmap.scaled(width, height, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
         self.spritePreview.setPixmap(pixmap)
         self.spritePreview.setScaledContents(False)
         self.spritePreview.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-    def duplicateWizard(self, checked):
+    def duplicate_wizard(self) -> None:
         self.infoBox.appendPlainText("Loading all duplicates...")
         self.infoBox.appendPlainText("(This might take a while)")
         self.infoBox.repaint()
-        wizard = WizardDialog(self, obj=None, animation="")
+        wizard = WizardDialog("")
         wizard.exec()
 
-    def animationDuplicates(self, checked):
-        if self.listWidget_3.currentItem() != None:
+    def animation_duplicates(self) -> None:
+        if self.listWidget_3.currentItem() is not None:
             self.infoBox.appendPlainText("Loading animation duplicates...")
             self.infoBox.repaint()
-            selectedAnimation = str(self.listWidget_3.currentItem().text())
+            selected_animation = str(self.listWidget_3.currentItem().text())
             self.animationFilter.setText("")
-            self.filterAnimations()
-            wizard = WizardDialog(self, obj=None, animation=selectedAnimation)
+            self.filter_animations()
+            wizard = WizardDialog(selected_animation)
             wizard.exec()
 
-    def updateAutoplay(self, value):
+    def update_autoplay(self, value: int) -> None:
         if value == 2:
-            if self.listWidget_4.item(0) != None:
+            if self.listWidget_4.item(0) is not None:
                 self.playAnimationButton.setEnabled(False)
                 self.listWidget_4.setCurrentRow(0)
-                QtCore.QTimer.singleShot(80, self.frameTimer)
+                QtCore.QTimer.singleShot(80, self.frame_timer)
 
-    def playAnimation(self, checked):
-        if self.listWidget_4.item(0) != None:
+    def play_animation(self) -> None:
+        if self.listWidget_4.item(0) is not None:
             if not self.autoplayAnimation.isChecked():
                 self.playAnimationButton.setEnabled(False)
                 self.listWidget_4.setCurrentRow(0)
-                QtCore.QTimer.singleShot(80, self.frameTimer)
+                QtCore.QTimer.singleShot(80, self.frame_timer)
 
-    def frameTimer(self):
-        if self.listWidget_4.item(0) != None:
+    def frame_timer(self) -> None:
+        if self.listWidget_4.item(0) is not None:
             # print("nextframe")
             if self.listWidget_4.currentRow() + 1 >= self.listWidget_4.count():
                 self.listWidget_4.setCurrentRow(0)
                 # print("restarted")
                 if self.autoplayAnimation.isChecked():
-                    QtCore.QTimer.singleShot(80, self.frameTimer)
+                    QtCore.QTimer.singleShot(80, self.frame_timer)
                 else:
                     self.playAnimationButton.setEnabled(True)
             else:
                 # print("frame advanced")
                 self.listWidget_4.setCurrentRow(self.listWidget_4.currentRow() + 1)
-                QtCore.QTimer.singleShot(80, self.frameTimer)
+                QtCore.QTimer.singleShot(80, self.frame_timer)
 
-    def filterAnimations(self):
-        animations = spriteHandler.loadAnimations(self.animationFilter.text())
+    def filter_animations(self) -> None:
+        animations = SpriteHandler.load_animations(self.animationFilter.text())
         self.listWidget_3.clear()
         self.listWidget_3.addItems(animations)
         self.listWidget_4.clear()
         self.listWidget_3.setCurrentRow(0)
 
-    def recoverSavedState(self):
-        savePath = path.join(
+    def recover_saved_state(self) -> None:
+        save_path = path.join(
             path.expanduser("~"), "CustomKnight Creator", "savestate.json"
         )
-        if not path.exists(path.dirname(savePath)):
-            makedirs(path.dirname(savePath))
-        Path(savePath).touch(exist_ok=True)
-        saveFile = open(savePath, "r")
+        if not path.exists(path.dirname(save_path)):
+            makedirs(path.dirname(save_path))
+        Path(save_path).touch(exist_ok=True)
+        save_file = open(save_path, "r", encoding="utf-8")
         # print(savePath)
-        if path.getsize(savePath) != 0:
-            saveData = json.load(saveFile)
+        if path.getsize(save_path) != 0:
+            save_data = json.load(save_file)
 
-            if saveData["openFolders"] != []:
-                self.listWidget.addItems(saveData["openFolders"])
-                spriteHandler.basepath = str(path.dirname(saveData["openFolders"][0]))
+            if save_data["openFolders"] != []:
+                self.listWidget.addItems(save_data["openFolders"])
+                SpriteHandler.basepath = str(path.dirname(save_data["openFolders"][0]))
                 # print("basepath:")
                 # print(spriteHandler.basepath)
-                self.loadCategories(False)
-                for category in saveData["enabledCategories"]:
-                    spriteHandler.categories[category] = saveData["enabledCategories"][
+                self.load_categories()
+                for category in save_data["enabledCategories"]:
+                    SpriteHandler.categories[category] = save_data["enabledCategories"][
                         category
                     ]
-                self.updateEnabled()
-                self.loadAnimations(False)
-            if saveData["outputFolder"] != "":
+                self.update_enabled()
+                self.load_animations()
+            if save_data["outputFolder"] != "":
                 # print("recovered output folder:")
                 # print(saveData["outputFolder"])
-                spriteHandler.savedOutputFolder = saveData["outputFolder"]
-                self.lineEdit.setText(saveData["outputFolder"])
+                SpriteHandler.savedOutputFolder = save_data["outputFolder"]
+                self.lineEdit.setText(save_data["outputFolder"])
 
-    def updateSavedState(self):
+    def update_saved_state(self) -> None:
         items = [self.listWidget.item(x).text() for x in range(self.listWidget.count())]
-        newState = json.dumps(
+        new_state = json.dumps(
             {
                 "openFolders": items,
-                "enabledCategories": spriteHandler.categories,
-                "outputFolder": spriteHandler.savedOutputFolder,
+                "enabledCategories": SpriteHandler.categories,
+                "outputFolder": SpriteHandler.savedOutputFolder,
             }
         )
         # print("new savestate:")
@@ -322,76 +353,78 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         outputfile = open(
             path.join(path.expanduser("~"), "CustomKnight Creator", "savestate.json"),
             "w",
+            encoding="utf-8",
         )
-        outputfile.write(newState)
+        outputfile.write(new_state)
         outputfile.close()
 
 
 class WizardDialog(QDialog, Ui_Dialog):
-    def __init__(self, *args, obj=None, **kwargs):
+    def __init__(self, animation: str) -> None:
         super(WizardDialog, self).__init__()
         self.setupUi(self)
-        animation = kwargs["animation"]
         # print(animation)
-        spriteHandler.loadDuplicates(animation)
-        self.duplicatesWidget.addItems(spriteHandler.duplicatesHashList)
-        self.updateFrames(self.duplicatesWidget.currentItem(), None)
-        self.updatePreview(self.listWidget.currentItem(), None)
-        self.updateCompletion()
+        SpriteHandler.load_duplicates(animation)
+        self.duplicatesWidget.addItems(SpriteHandler.duplicatesHashList)
+        self.update_frames(self.duplicatesWidget.currentItem(), None)
+        self.update_preview(self.listWidget.currentItem(), None)
+        self.update_completion()
 
-    def selectMainCopy(self, checked):
-        if self.listWidget.currentItem() != None:
-            spriteHandler.copyMain(str(self.listWidget.currentItem().text()))
-            self.updateCompletion()
+    def select_main_copy(self) -> None:
+        if self.listWidget.currentItem() is not None:
+            SpriteHandler.copy_main(str(self.listWidget.currentItem().text()))
+            self.update_completion()
             window.infoBox.appendPlainText("Duplicates replaced with selected sprite.")
 
-    def autoreplaceAll(self, check):
+    def autoreplace_all(self) -> None:
         if self.duplicatesWidget.count() != 0:
             for item in [
                 self.duplicatesWidget.item(x).text()
                 for x in range(self.duplicatesWidget.count())
             ]:
                 print(item)
-                timeSort = sorted(
+                time_sort = sorted(
                     [
-                        spriteHandler.basepath + "/" + x
-                        for x in spriteHandler.duplicatesList[
-                            spriteHandler.duplicatesHashList.index(item)
+                        SpriteHandler.basepath + "/" + x
+                        for x in SpriteHandler.duplicatesList[
+                            SpriteHandler.duplicatesHashList.index(item)
                         ]
                     ],
                     key=path.getmtime,
                     reverse=True,
                 )
-                file = timeSort[0]
-                i = spriteHandler.spritePath.index(
-                    [x for x in spriteHandler.spritePath if x in file][0]
+                file = time_sort[0]
+                i = SpriteHandler.spritePath.index(
+                    [x for x in SpriteHandler.spritePath if x in file][0]
                 )
-                im = Image.open(file)
-                im = im.crop(
+                image = Image.open(file)
+                image = image.crop(
                     (
-                        spriteHandler.spriteXR[i],
-                        im.size[1]
-                        - spriteHandler.spriteYR[i]
-                        - spriteHandler.spriteH[i],
-                        spriteHandler.spriteXR[i] + spriteHandler.spriteW[i],
-                        im.size[1] - spriteHandler.spriteYR[i],
+                        SpriteHandler.spriteXR[i],
+                        image.size[1]
+                        - SpriteHandler.spriteYR[i]
+                        - SpriteHandler.spriteH[i],
+                        SpriteHandler.spriteXR[i] + SpriteHandler.spriteW[i],
+                        image.size[1] - SpriteHandler.spriteYR[i],
                     )
                 )
-                imData = im.getdata()
-                newHash = hash(tuple(map(tuple, imData)))
+                image_data = image.getdata()
+                new_hash = hash(tuple(map(tuple, image_data)))
                 print(file)
-                if newHash != item:
-                    spriteHandler.copyMain(spriteHandler.spritePath[i])
-        self.updateCompletion()
+                if new_hash != item:
+                    SpriteHandler.copy_main(SpriteHandler.spritePath[i])
+        self.update_completion()
         window.infoBox.appendPlainText(
             "All changed sprites have been copied to their duplicates."
         )
 
-    def updatePreview(self, current, previous):
-        if current != None:
+    def update_preview(
+        self, current: Optional[QListWidgetItem], _previous: Optional[QListWidgetItem]
+    ) -> None:
+        if current is not None:
             width = self.preview.width()
             height = self.preview.height()
-            pixmap = QtGui.QPixmap(spriteHandler.basepath + "/" + str(current.text()))
+            pixmap = QtGui.QPixmap(SpriteHandler.basepath + "/" + str(current.text()))
             pixmap = pixmap.scaled(
                 width, height, QtCore.Qt.AspectRatioMode.KeepAspectRatio
             )
@@ -399,30 +432,32 @@ class WizardDialog(QDialog, Ui_Dialog):
             self.preview.setScaledContents(False)
             self.preview.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-    def updateFrames(self, current, previous):
-        if current != None:
+    def update_frames(
+        self, current: Optional[QListWidgetItem], _previous: Optional[QListWidgetItem]
+    ) -> None:
+        if current is not None:
             self.listWidget.clear()
-            currentItem = str(self.duplicatesWidget.currentItem().text())
-            index = spriteHandler.duplicatesHashList.index(currentItem)
-            sortedDuplicates = spriteHandler.sortByHash(index, currentItem)
-            self.listWidget.addItems(sortedDuplicates)
+            current_item = str(self.duplicatesWidget.currentItem().text())
+            index = SpriteHandler.duplicatesHashList.index(current_item)
+            sorted_duplicates = SpriteHandler.sort_by_hash(index, current_item)
+            self.listWidget.addItems(sorted_duplicates)
             self.listWidget.setCurrentRow(0)
 
-    def updateCompletion(self):
-        greenBrush = QtGui.QBrush(
+    def update_completion(self) -> None:
+        green_brush = QtGui.QBrush(
             QtCore.Qt.GlobalColor.green, QtCore.Qt.BrushStyle.Dense4Pattern
         )
-        redBrush = QtGui.QBrush(
+        red_brush = QtGui.QBrush(
             QtCore.Qt.GlobalColor.red, QtCore.Qt.BrushStyle.Dense4Pattern
         )
         for item in [
             self.duplicatesWidget.item(x) for x in range(self.duplicatesWidget.count())
         ]:
-            currentItem = item.text()
-            index = spriteHandler.duplicatesHashList.index(currentItem)
-            sortedDuplicates = spriteHandler.sortByHash(index, currentItem)
-            if spriteHandler.checkCompletion(sortedDuplicates, currentItem):
-                item.setBackground(greenBrush)
+            current_item = item.text()
+            index = SpriteHandler.duplicatesHashList.index(current_item)
+            sorted_duplicates = SpriteHandler.sort_by_hash(index, current_item)
+            if SpriteHandler.check_completion(sorted_duplicates, current_item):
+                item.setBackground(green_brush)
                 item.setIcon(
                     QtGui.QIcon(
                         os.path.abspath(
@@ -433,7 +468,7 @@ class WizardDialog(QDialog, Ui_Dialog):
                     )
                 )
             else:
-                item.setBackground(redBrush)
+                item.setBackground(red_brush)
                 item.setIcon(
                     QtGui.QIcon(
                         os.path.abspath(
