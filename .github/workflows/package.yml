@@ -12,7 +12,7 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
-              pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources --target-arch universal2 --collect-all PyQt6 &&
+              pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources &&
               cd dist/ &&
               zip -r9 "CustomKnight Creator" "CustomKnight Creator.app/"
             OUT_FILE_PATH: "dist/CustomKnight Creator.zip"
