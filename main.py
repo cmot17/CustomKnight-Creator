@@ -28,61 +28,75 @@ QtCore.QDir.addSearchPath("resources", "resources")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-
-    rootFolders: list[Path] = []
-
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
+        self.root_folders: list[Path] = []
+        self.loaded_categories: list[str] = []
+        self.base_path: Path = Path("")
+
         self.setupUi(self)
         self.recover_saved_state()
 
     def add_root_folder(self) -> None:
-        fname = ""
-        fname = QFileDialog.getExistingDirectory(
-            self,
-            'Select a base level animations folder (e.g. "Knight")',
-            "c:\\",
-            QFileDialog.Option.ShowDirsOnly,
+        selected_path = Path(
+            QFileDialog.getExistingDirectory(
+                self,
+                'Select a base level animations folder (e.g. "Knight")',
+                str(
+                    self.base_path.resolve()
+                    if self.base_path != Path("")
+                    else Path.home()
+                ),
+                QFileDialog.Option.ShowDirsOnly,
+            )
         )
-        fname += "/0.Atlases/SpriteInfo.json"
-        # print("fname: ")
-        # print(fname)
-        if fname != "/0.Atlases/SpriteInfo.json":
-            if not self.listWidget.findItems(fname, QtCore.Qt.MatchFlag.MatchExactly):
-                if self.listWidget.item(0) is not None:
-                    if str(Path(fname).parents[2]) == SpriteHandler.basepath:
-                        self.listWidget.addItem(
-                            QListWidgetItem(str(Path(fname).parents[1]))
-                        )
-                        self.update_saved_state()
-                    else:
-                        QMessageBox.warning(
-                            window,
-                            "Inconsistent Base Path",
-                            "Inconsistent Base Path:\n"
-                            "Please make sure all of your top level sprite"
-                            " folders are in the same directory."
-                            "(For example, the Knight and Spells Anim"
-                            " folders should be in the same folder)",
-                        )
-                else:
-                    SpriteHandler.basepath = str(Path(fname).parents[2])
-                    # print("basepath:")
-                    # print(spriteHandler.basepath)
-                    self.listWidget.addItem(
-                        QListWidgetItem(str(Path(fname).parents[1]))
-                    )
-                    self.update_saved_state()
-            else:
-                QMessageBox.warning(
-                    window,
-                    "Duplicate File Selected",
-                    "Duplicate File Selected:\nPlease select a JSON file not already in the list",
-                )
+        # print("selected_path: ")
+        # print(selected_path)
+        if str(selected_path) == "":
+            return
+
+        if selected_path in self.root_folders:
+            QMessageBox.warning(
+                window,
+                "Duplicate File Selected",
+                "Duplicate File Selected:\nPlease select a JSON file not already in the list",
+            )
+            return
+
+        if not self.root_folders:
+            self.base_path = selected_path.parent
+            self.root_folders.append(selected_path)
+            self.listWidget.addItem(QListWidgetItem(str(selected_path.name)))
+            self.update_saved_state()
+            return
+
+        if selected_path.parent != self.base_path:
+            QMessageBox.warning(
+                window,
+                "Inconsistent Base Path",
+                "Inconsistent Base Path:\n"
+                "Please make sure all of your top level sprite"
+                " folders are in the same directory."
+                "(For example, the Knight and Spells Anim"
+                " folders should be in the same folder)",
+            )
+            return
+
+        self.root_folders.append(selected_path)
+        self.listWidget.addItem(QListWidgetItem(str(selected_path.name)))
+        self.update_saved_state()
+        return
 
     def remove_root_folder(self) -> None:
-        self.listWidget.takeItem(self.listWidget.currentRow())
-        self.update_saved_state()
+        if self.listWidget.currentItem() is not None:
+            print(self.root_folders)
+            print(self.base_path / self.listWidget.currentItem().text())
+            self.root_folders.remove(
+                self.base_path / self.listWidget.currentItem().text()
+            )
+            self.listWidget.takeItem(self.listWidget.currentRow())
+            print(self.root_folders)
+            self.update_saved_state()
 
     def enable_category(self) -> None:
         if self.listWidget_2.currentItem() is not None:
@@ -101,13 +115,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # print(spriteHandler.categories)
 
     def load_categories(self) -> None:
-        files = []
-        for i in range(self.listWidget.count()):
-            files.append(self.listWidget.item(i).text() + "/0.Atlases/SpriteInfo.json")
-        # print(files)
-        categories = SpriteHandler.load_sprite_info(files)
+        self.loaded_categories = SpriteHandler.load_sprite_info(
+            [file / "0.Atlases/SpriteInfo.json" for file in self.root_folders]
+        )
         self.listWidget_2.clear()
-        self.listWidget_2.addItems(categories)
+        self.listWidget_2.addItems(self.loaded_categories)
         self.update_enabled()
         self.infoBox.appendPlainText("Categories loaded.")
 
@@ -319,8 +331,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             save_data = json.load(save_file)
 
             if save_data["openFolders"] != []:
-                self.listWidget.addItems(save_data["openFolders"])
-                SpriteHandler.basepath = str(path.dirname(save_data["openFolders"][0]))
+                self.root_folders = [
+                    Path(folder) for folder in save_data["openFolders"]
+                ]
+                print(self.root_folders)
+                self.listWidget.addItems([folder.name for folder in self.root_folders])
+                self.base_path = self.root_folders[0].parent
                 # print("basepath:")
                 # print(spriteHandler.basepath)
                 self.load_categories()
@@ -337,11 +353,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEdit.setText(save_data["outputFolder"])
 
     def update_saved_state(self) -> None:
-        items = [self.listWidget.item(x).text() for x in range(self.listWidget.count())]
         new_state = json.dumps(
             {
-                "openFolders": items,
-                "enabledCategories": SpriteHandler.categories,
+                "openFolders": [str(folder) for folder in self.root_folders],
+                "enabledCategories": self.loaded_categories,
                 "outputFolder": SpriteHandler.savedOutputFolder,
             }
         )

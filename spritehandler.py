@@ -51,7 +51,7 @@ class SpriteHandler:
     duplicatesList: list[list[str]] = []
 
     @staticmethod
-    def load_sprite_info(files: list[str]) -> list[str]:
+    def load_sprite_info(files: list[Path]) -> list[str]:
         categories: list[str] = []
         SpriteHandler.dataArray = []
         for file in files:
