@@ -90,7 +90,7 @@ class Ui_MainWindow(object):
         self.categoriesListWidget.setObjectName(u"categoriesListWidget")
         sizePolicy.setHeightForWidth(self.categoriesListWidget.sizePolicy().hasHeightForWidth())
         self.categoriesListWidget.setSizePolicy(sizePolicy)
-        self.categoriesListWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.categoriesListWidget.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
 
         self.horizontalLayout_2.addWidget(self.categoriesListWidget)
 
@@ -126,7 +126,7 @@ class Ui_MainWindow(object):
         self.infoBox.setObjectName(u"infoBox")
         self.infoBox.setAcceptDrops(True)
         self.infoBox.setUndoRedoEnabled(False)
-        self.infoBox.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.infoBox.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.infoBox.setReadOnly(True)
 
         self.verticalLayout.addWidget(self.infoBox)

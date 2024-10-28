@@ -1,7 +1,9 @@
 import json
 import os
 from pathlib import Path
+import sys
 from typing import Optional, List
+
 
 from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (
@@ -15,8 +17,6 @@ from spritehandler import SpriteHandler
 from spritepacker_ui import Ui_MainWindow
 from wizard_dialog import WizardDialog
 
-# Add search path for resources
-QtCore.QDir.addSearchPath("resources", "resources")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -26,6 +26,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.root_folders: List[Path] = []
         self.loaded_categories: List[str] = []
+        # Separate resource path for icons and other UI elements
+        if hasattr(sys, '_MEIPASS'):
+            resources_path = Path(sys._MEIPASS) / "resources" #type: ignore
+        else:
+            resources_path = Path("resources")
+        
+        self.resources_path = resources_path
+        
         self.base_path: Path = Path("")
 
         self.setupUi(self)
@@ -33,16 +41,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def add_root_folder(self) -> None:
         """Adds a root folder containing animations."""
+        print("Starting add_root_folder method")  # Debug print
         initial_dir = (
-            str(self.base_path.resolve()) if self.base_path != Path("") else str(Path.home())
+            str(self.base_path.resolve())
+            if self.base_path != Path("")
+            else str(Path.home())
         )
+        print(f"Initial directory: {initial_dir}")  # Debug print
         selected_path_str = QFileDialog.getExistingDirectory(
             self,
             'Select a base level animations folder (e.g., "Knight")',
             initial_dir,
-            QFileDialog.Option.ShowDirsOnly,
+            QFileDialog.Option.ShowDirsOnly
         )
+        print(f"Selected path: {selected_path_str}")  # Debug print
+
         if not selected_path_str:
+            print("No path selected, returning")  # Debug print
             return
 
         selected_path = Path(selected_path_str)
@@ -64,6 +79,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 "Inconsistent Base Path",
                 "All top-level sprite folders must be in the same directory.",
             )
+
             return
 
         self.root_folders.append(selected_path)
@@ -78,7 +94,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             folder_path = self.base_path / folder_name
             if folder_path in self.root_folders:
                 self.root_folders.remove(folder_path)
-                self.rootFoldersListWidget.takeItem(self.rootFoldersListWidget.currentRow())
+                self.rootFoldersListWidget.takeItem(
+                    self.rootFoldersListWidget.currentRow()
+                )
                 self.update_saved_state()
 
     def enable_category(self) -> None:
@@ -97,7 +115,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def load_categories(self) -> None:
         """Loads categories from the selected root folders."""
-        sprite_info_paths = [folder / "0.Atlases/SpriteInfo.json" for folder in self.root_folders]
+        sprite_info_paths = [
+            folder / "0.Atlases/SpriteInfo.json" for folder in self.root_folders
+        ]
         self.loaded_categories = SpriteHandler.load_sprite_info(sprite_info_paths)
         self.categoriesListWidget.clear()
         self.categoriesListWidget.addItems(self.loaded_categories)
@@ -115,8 +135,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if items:
                 item = items[0]
                 item.setBackground(green_brush if is_enabled else red_brush)
-                icon_path = "resources/checkicon.png" if is_enabled else "resources/xicon.png"
-                item.setIcon(QtGui.QIcon(icon_path))
+                icon_path = self.resources_path / (
+                    "checkicon.png" if is_enabled else "xicon.png"
+                )
+                item.setIcon(QtGui.QIcon(str(icon_path)))
         self.update_saved_state()
 
     def load_animations(self) -> None:
@@ -164,8 +186,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 button = QMessageBox.warning(
                     self,
                     "Some duplicate sprites are not modified",
-                    "Some duplicate sprites are not modified.\n"
-                    "Continue packing?",
+                    "Some duplicate sprites are not modified.\n" "Continue packing?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                     defaultButton=QMessageBox.StandardButton.No,
                 )
@@ -291,13 +312,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if os.path.getsize(save_path) != 0:
                 save_data = json.load(save_file)
 
-                self.root_folders = [Path(folder) for folder in save_data.get("openFolders", [])]
-                self.rootFoldersListWidget.addItems([folder.name for folder in self.root_folders])
+                self.root_folders = [
+                    Path(folder) for folder in save_data.get("openFolders", [])
+                ]
+                self.rootFoldersListWidget.addItems(
+                    [folder.name for folder in self.root_folders]
+                )
                 if self.root_folders:
                     self.base_path = self.root_folders[0].parent
                     SpriteHandler.basepath = str(self.base_path)
                     self.load_categories()
-                    SpriteHandler.categories.update(save_data.get("enabledCategories", {}))
+                    SpriteHandler.categories.update(
+                        save_data.get("enabledCategories", {})
+                    )
                     self.update_enabled_categories()
                     self.load_animations()
                 output_folder = save_data.get("outputFolder", "")
