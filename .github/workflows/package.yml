@@ -32,17 +32,19 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: 3.13
-    - name: Install dependencies
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
       run: |
         python -m pip install --upgrade pip
-        if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-          python -m pip install --no-binary :all: --compile -r requirements.txt
-        else
-          python -m pip install -r requirements.txt
-        fi
-    - name: Build with pyinstaller for ${{matrix.TARGET}}
-      run: ${{matrix.CMD_BUILD}}
+        python -m pip install --no-binary :all: --compile -r requirements.txt
+    - name: Install dependencies (Windows/Linux)
+      if: matrix.os != 'macos-latest'
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+    - name: Build with pyinstaller for ${{ matrix.TARGET }}
+      run: ${{ matrix.CMD_BUILD }}
     - uses: actions/upload-artifact@v3.1.0
       with:
-        name: ${{matrix.TARGET}}
-        path: ${{matrix.OUT_FILE_PATH}}
+        name: ${{ matrix.TARGET }}
+        path: ${{ matrix.OUT_FILE_PATH }}
