@@ -212,7 +212,7 @@ class SpriteHandler:
 
                         if SpriteHandler.spriteFlipped[i]:
                             image = image.rotate(90, expand=True)
-                            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+                            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
                         out.paste(image, (x_pos, y_pos))
                 try:

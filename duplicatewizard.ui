@@ -28,7 +28,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="duplicatesWidget">
+      <widget class="QListWidget" name="duplicatesListWidget">
        <property name="minimumSize">
         <size>
          <width>151</width>
@@ -49,7 +49,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="listWidget">
+      <widget class="QListWidget" name="framesListWidget">
        <property name="minimumSize">
         <size>
          <width>151</width>
@@ -78,21 +78,21 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="replaceButton">
          <property name="text">
           <string>Select Main Copy</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="autoReplaceButton">
          <property name="text">
           <string>Autoreplace All</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="finishButton">
          <property name="text">
           <string>Finish</string>
          </property>
@@ -109,7 +109,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>replaceButton</sender>
    <signal>clicked()</signal>
    <receiver>Dialog</receiver>
    <slot>select_main_copy()</slot>
@@ -125,7 +125,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_3</sender>
+   <sender>finishButton</sender>
    <signal>clicked()</signal>
    <receiver>Dialog</receiver>
    <slot>accept()</slot>
@@ -141,7 +141,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>listWidget</sender>
+   <sender>framesListWidget</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>Dialog</receiver>
    <slot>update_preview()</slot>
@@ -157,7 +157,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>duplicatesWidget</sender>
+   <sender>duplicatesListWidget</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>Dialog</receiver>
    <slot>update_frames()</slot>
@@ -173,7 +173,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>autoReplaceButton</sender>
    <signal>clicked()</signal>
    <receiver>Dialog</receiver>
    <slot>autoreplace_all()</slot>

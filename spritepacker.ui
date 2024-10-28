@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1019</width>
-    <height>636</height>
+    <width>1022</width>
+    <height>642</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QListWidget" name="listWidget">
+         <widget class="QListWidget" name="rootFoldersListWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -48,21 +48,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="addRootFolderButton">
           <property name="text">
            <string>Add</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="removeRootFolderButton">
           <property name="text">
            <string>Remove</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_10">
+         <widget class="QPushButton" name="loadCategoriesButton">
           <property name="text">
            <string>Load Categories</string>
           </property>
@@ -80,7 +80,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QListWidget" name="listWidget_2">
+         <widget class="QListWidget" name="categoriesListWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -97,21 +97,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="enableCategoryButton">
           <property name="text">
            <string>Enable</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_4">
+         <widget class="QPushButton" name="disableCategoryButton">
           <property name="text">
            <string>Disable</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_11">
+         <widget class="QPushButton" name="loadAnimationsButton">
           <property name="text">
            <string>Load Animations</string>
           </property>
@@ -175,14 +175,14 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
-         <widget class="QPushButton" name="pushButton_5">
+         <widget class="QPushButton" name="animationDuplicatesButton">
           <property name="text">
            <string>View Animation Duplicate Groups</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_6">
+         <widget class="QPushButton" name="duplicateWizardButton">
           <property name="text">
            <string>View All Duplicate Groups</string>
           </property>
@@ -205,7 +205,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="autoplayAnimation">
+         <widget class="QCheckBox" name="autoplayAnimationCheckBox">
           <property name="text">
            <string>Autoplay</string>
           </property>
@@ -225,7 +225,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="animationFilter">
+           <widget class="QLineEdit" name="animationFilterLineEdit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -241,7 +241,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="listWidget_3">
+           <widget class="QListWidget" name="animationsListWidget">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -268,7 +268,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="listWidget_4">
+           <widget class="QListWidget" name="spritesListWidget">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -284,21 +284,21 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="QPushButton" name="pushButton_8">
+         <widget class="QPushButton" name="packSpritesButton">
           <property name="text">
            <string>Pack!</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_9">
+         <widget class="QPushButton" name="chooseOutputFolderButton">
           <property name="text">
            <string>Select Output Folder</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="outputFolderLineEdit">
           <property name="placeholderText">
            <string>Output folder path</string>
           </property>
@@ -312,12 +312,10 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>addRootFolderButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>add_root_folder()</slot>
@@ -333,7 +331,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>removeRootFolderButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>remove_root_folder()</slot>
@@ -349,7 +347,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_3</sender>
+   <sender>enableCategoryButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>enable_category()</slot>
@@ -365,7 +363,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_4</sender>
+   <sender>disableCategoryButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>disable_category()</slot>
@@ -381,7 +379,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_10</sender>
+   <sender>loadCategoriesButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>load_categories()</slot>
@@ -397,7 +395,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_11</sender>
+   <sender>loadAnimationsButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>load_animations()</slot>
@@ -413,7 +411,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>listWidget_3</sender>
+   <sender>animationsListWidget</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>MainWindow</receiver>
    <slot>animation_changed()</slot>
@@ -429,7 +427,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>listWidget_4</sender>
+   <sender>spritesListWidget</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
    <receiver>MainWindow</receiver>
    <slot>sprite_changed()</slot>
@@ -445,7 +443,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_8</sender>
+   <sender>packSpritesButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>pack_sprites()</slot>
@@ -461,7 +459,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_9</sender>
+   <sender>chooseOutputFolderButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>choose_out_folder()</slot>
@@ -477,7 +475,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_6</sender>
+   <sender>duplicateWizardButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>duplicate_wizard()</slot>
@@ -493,7 +491,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_5</sender>
+   <sender>animationDuplicatesButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>animation_duplicates()</slot>
@@ -525,7 +523,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>animationFilter</sender>
+   <sender>animationFilterLineEdit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
    <slot>filter_animations()</slot>
@@ -541,7 +539,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>lineEdit</sender>
+   <sender>outputFolderLineEdit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
    <slot>update_output_path()</slot>
@@ -557,7 +555,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>autoplayAnimation</sender>
+   <sender>autoplayAnimationCheckBox</sender>
    <signal>stateChanged(int)</signal>
    <receiver>MainWindow</receiver>
    <slot>update_autoplay()</slot>
