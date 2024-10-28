@@ -54,19 +54,30 @@ class SpriteHandler:
     def load_sprite_info(files: list[Path]) -> list[str]:
         categories: list[str] = []
         SpriteHandler.dataArray = []
+
         for file in files:
-            data = json.load(open(file, "r", encoding="utf-8"))
-            SpriteHandler.dataArray.append(data)
-            sprite_collection_list = list(
-                dict.fromkeys(data["scollectionname"])
-            )  # remove duplicates
-            categories += sprite_collection_list
+            try:
+                with open(file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                
+                SpriteHandler.dataArray.append(data)
+                sprite_collection_list = list(
+                        dict.fromkeys(data.get("scollectionname", []))
+                )  # remove duplicates
+                categories += sprite_collection_list
+
+            except FileNotFoundError:
+                print(f"Error: The file {file} was not found.")
+            except json.JSONDecodeError:
+                print(f"Error: Could not decode JSON from the file {file}.")
+            except Exception as e:
+                print(f"Error: An unexpected error occurred with the file {file}: {e}")
 
         final_categories = list(dict.fromkeys(categories))  # remove duplicates
-        # print(finalCategories)
         SpriteHandler.categories.clear()
         for category in final_categories:
             SpriteHandler.categories[category] = True
+        
         return final_categories
 
     @staticmethod

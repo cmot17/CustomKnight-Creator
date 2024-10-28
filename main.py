@@ -324,33 +324,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         if not path.exists(path.dirname(save_path)):
             makedirs(path.dirname(save_path))
-        Path(save_path).touch(exist_ok=True)
-        save_file = open(save_path, "r", encoding="utf-8")
-        # print(savePath)
-        if path.getsize(save_path) != 0:
-            save_data = json.load(save_file)
+        
+        # Check if the file exists before trying to open it
+        if not path.exists(save_path):
+            print("No saved state to recover.")
+            return  # Exit the function if the file doesn't exist
 
-            if save_data["openFolders"] != []:
-                self.root_folders = [
-                    Path(folder) for folder in save_data["openFolders"]
-                ]
-                print(self.root_folders)
-                self.listWidget.addItems([folder.name for folder in self.root_folders])
-                self.base_path = self.root_folders[0].parent
-                # print("basepath:")
-                # print(spriteHandler.basepath)
-                self.load_categories()
-                for category in save_data["enabledCategories"]:
-                    SpriteHandler.categories[category] = save_data["enabledCategories"][
-                        category
+        # Proceed if the file exists
+        with open(save_path, "r", encoding="utf-8") as save_file:
+            if path.getsize(save_path) != 0:
+                save_data = json.load(save_file)
+
+                if save_data["openFolders"]:
+                    self.root_folders = [
+                        Path(folder) for folder in save_data["openFolders"]
                     ]
-                self.update_enabled()
-                self.load_animations()
-            if save_data["outputFolder"] != "":
-                # print("recovered output folder:")
-                # print(saveData["outputFolder"])
-                SpriteHandler.savedOutputFolder = save_data["outputFolder"]
-                self.lineEdit.setText(save_data["outputFolder"])
+                    print(self.root_folders)
+                    self.listWidget.addItems([folder.name for folder in self.root_folders])
+                    self.base_path = self.root_folders[0].parent
+                    self.load_categories()
+                    for category in save_data["enabledCategories"]:
+                        SpriteHandler.categories[category] = save_data["enabledCategories"][
+                            category
+                        ]
+                    self.update_enabled()
+                    self.load_animations()
+                if save_data["outputFolder"]:
+                    SpriteHandler.savedOutputFolder = save_data["outputFolder"]
+                    self.lineEdit.setText(save_data["outputFolder"])
+
 
     def update_saved_state(self) -> None:
         new_state = json.dumps(
