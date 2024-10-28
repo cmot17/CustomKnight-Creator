@@ -27,26 +27,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.base_path: Path = Path("")
 
         self.setupUi(self)
-        self.connect_signals()
         self.recover_saved_state()
 
-    def connect_signals(self) -> None:
-        self.addRootFolderButton.clicked.connect(self.add_root_folder)
-        self.removeRootFolderButton.clicked.connect(self.remove_root_folder)
-        self.enableCategoryButton.clicked.connect(self.enable_category)
-        self.disableCategoryButton.clicked.connect(self.disable_category)
-        self.loadCategoriesButton.clicked.connect(self.load_categories)
-        self.loadAnimationsButton.clicked.connect(self.load_animations)
-        self.animationsListWidget.currentItemChanged.connect(self.animation_changed)
-        self.spritesListWidget.currentItemChanged.connect(self.sprite_changed)
-        self.packSpritesButton.clicked.connect(self.pack_sprites)
-        self.chooseOutputFolderButton.clicked.connect(self.choose_out_folder)
-        self.outputFolderLineEdit.textChanged.connect(self.update_output_path)
-        self.duplicateWizardButton.clicked.connect(self.duplicate_wizard)
-        self.animationDuplicatesButton.clicked.connect(self.animation_duplicates)
-        self.autoplayAnimationCheckBox.stateChanged.connect(self.update_autoplay)
-        self.playAnimationButton.clicked.connect(self.play_animation)
-        self.animationFilterLineEdit.textChanged.connect(self.filter_animations)
 
     def add_root_folder(self) -> None:
         selected_path_str = QFileDialog.getExistingDirectory(
