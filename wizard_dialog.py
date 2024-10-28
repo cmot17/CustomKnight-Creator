@@ -2,8 +2,8 @@ import os
 from typing import Optional
 
 from PIL import Image
-from PyQt6 import QtCore, QtGui
-from PyQt6.QtWidgets import QDialog, QListWidgetItem
+from PySide6 import QtCore, QtGui
+from PySide6.QtWidgets import QDialog, QListWidgetItem
 
 from duplicatewizard_ui import Ui_Dialog
 from spritehandler import SpriteHandler

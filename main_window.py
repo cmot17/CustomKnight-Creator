@@ -1,11 +1,10 @@
 import json
 import os
-from os import makedirs, path
 from pathlib import Path
 from typing import Optional, List
 
-from PyQt6 import QtCore, QtGui
-from PyQt6.QtWidgets import (
+from PySide6 import QtCore, QtGui
+from PySide6.QtWidgets import (
     QFileDialog,
     QListWidgetItem,
     QMainWindow,
@@ -16,10 +15,13 @@ from spritehandler import SpriteHandler
 from spritepacker_ui import Ui_MainWindow
 from wizard_dialog import WizardDialog
 
-
+# Add search path for resources
 QtCore.QDir.addSearchPath("resources", "resources")
 
+
 class MainWindow(QMainWindow, Ui_MainWindow):
+    """Main window class handling UI and logic for the CustomKnight Creator application."""
+
     def __init__(self) -> None:
         super().__init__()
         self.root_folders: List[Path] = []
@@ -29,12 +31,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.recover_saved_state()
 
-
     def add_root_folder(self) -> None:
+        """Adds a root folder containing animations."""
+        initial_dir = (
+            str(self.base_path.resolve()) if self.base_path != Path("") else str(Path.home())
+        )
         selected_path_str = QFileDialog.getExistingDirectory(
             self,
-            'Select a base level animations folder (e.g. "Knight")',
-            str(self.base_path.resolve() if self.base_path != Path("") else Path.home()),
+            'Select a base level animations folder (e.g., "Knight")',
+            initial_dir,
             QFileDialog.Option.ShowDirsOnly,
         )
         if not selected_path_str:
@@ -52,6 +57,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if not self.root_folders:
             self.base_path = selected_path.parent
+            SpriteHandler.basepath = str(self.base_path)
         elif selected_path.parent != self.base_path:
             QMessageBox.warning(
                 self,
@@ -65,6 +71,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_saved_state()
 
     def remove_root_folder(self) -> None:
+        """Removes the selected root folder from the list."""
         current_item = self.rootFoldersListWidget.currentItem()
         if current_item:
             folder_name = current_item.text()
@@ -75,30 +82,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_saved_state()
 
     def enable_category(self) -> None:
+        """Enables the selected categories."""
         for category_item in self.categoriesListWidget.selectedItems():
             category_id = category_item.text()
             SpriteHandler.categories[category_id] = True
-        self.update_enabled()
+        self.update_enabled_categories()
 
     def disable_category(self) -> None:
+        """Disables the selected categories."""
         for category_item in self.categoriesListWidget.selectedItems():
             category_id = category_item.text()
             SpriteHandler.categories[category_id] = False
-        self.update_enabled()
+        self.update_enabled_categories()
 
     def load_categories(self) -> None:
+        """Loads categories from the selected root folders."""
         sprite_info_paths = [folder / "0.Atlases/SpriteInfo.json" for folder in self.root_folders]
         self.loaded_categories = SpriteHandler.load_sprite_info(sprite_info_paths)
         self.categoriesListWidget.clear()
         self.categoriesListWidget.addItems(self.loaded_categories)
-        self.update_enabled()
+        self.update_enabled_categories()
         self.infoBox.appendPlainText("Categories loaded.")
 
-    def update_enabled(self) -> None:
+    def update_enabled_categories(self) -> None:
+        """Updates the visual representation of enabled/disabled categories."""
         green_brush = QtGui.QBrush(QtCore.Qt.GlobalColor.green)
         red_brush = QtGui.QBrush(QtCore.Qt.GlobalColor.red)
         for category_name, is_enabled in SpriteHandler.categories.items():
-            items = self.categoriesListWidget.findItems(category_name, QtCore.Qt.MatchFlag.MatchExactly)
+            items = self.categoriesListWidget.findItems(
+                category_name, QtCore.Qt.MatchFlag.MatchExactly
+            )
             if items:
                 item = items[0]
                 item.setBackground(green_brush if is_enabled else red_brush)
@@ -107,7 +120,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_saved_state()
 
     def load_animations(self) -> None:
-        animations = SpriteHandler.load_animations("")
+        """Loads animations based on the enabled categories."""
+        animations = SpriteHandler.load_animations(self.animationFilterLineEdit.text())
         self.animationsListWidget.clear()
         self.animationsListWidget.addItems(animations)
         self.spritesListWidget.clear()
@@ -117,6 +131,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def animation_changed(
         self, current: Optional[QListWidgetItem], _previous: Optional[QListWidgetItem]
     ) -> None:
+        """Updates the sprite list when the selected animation changes."""
         if current:
             self.spritesListWidget.clear()
             sprites = SpriteHandler.load_sprites(current.text())
@@ -126,22 +141,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def sprite_changed(
         self, current: Optional[QListWidgetItem], _previous: Optional[QListWidgetItem]
     ) -> None:
+        """Updates the sprite preview when the selected sprite changes."""
         if current:
-            sprite_path = next((x for x in SpriteHandler.spritePath if current.text() in x), "")
+            sprite_path = next(
+                (x for x in SpriteHandler.spritePath if current.text() in x), ""
+            )
             if sprite_path:
                 self.update_preview(sprite_path)
 
     def pack_sprites(self) -> None:
+        """Packs sprites into the selected output folder."""
         output_path = self.outputFolderLineEdit.text()
-        if path.isdir(output_path) and output_path:
+        if os.path.isdir(output_path) and output_path:
             SpriteHandler.load_duplicates("")
-            incomplete = False
-            for item in SpriteHandler.duplicatesHashList:
-                index = SpriteHandler.duplicatesHashList.index(item)
-                sorted_duplicates = SpriteHandler.sort_by_hash(index, item)
-                if not SpriteHandler.check_completion(sorted_duplicates, item):
-                    incomplete = True
-                    break
+            incomplete = any(
+                not SpriteHandler.check_completion(
+                    SpriteHandler.sort_by_hash(index, item), item
+                )
+                for index, item in enumerate(SpriteHandler.duplicatesHashList)
+            )
             if incomplete:
                 button = QMessageBox.warning(
                     self,
@@ -157,7 +175,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     return
             self.infoBox.appendPlainText("Packing sprites...")
             self.infoBox.repaint()
-            self.animationFilterLineEdit.setText("")
+            self.animationFilterLineEdit.clear()
             self.filter_animations()
             success = SpriteHandler.pack_sprites(output_path)
             if not success:
@@ -178,25 +196,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
 
     def choose_out_folder(self) -> None:
+        """Opens a dialog to select the output folder."""
         dirname = QFileDialog.getExistingDirectory(
             self,
             "Select a folder to output packed sprites into",
-            "c:\\",
+            str(Path.home()),
             QFileDialog.Option.ShowDirsOnly,
         )
-        self.outputFolderLineEdit.setText(dirname)
-        self.infoBox.appendPlainText("Output folder selected.")
+        if dirname:
+            self.outputFolderLineEdit.setText(dirname)
+            self.infoBox.appendPlainText("Output folder selected.")
 
     def update_output_path(self, _new_path: str) -> None:
+        """Updates the saved output path when changed."""
         SpriteHandler.savedOutputFolder = self.outputFolderLineEdit.text()
         self.update_saved_state()
 
     def update_preview(self, new_path: str) -> None:
-        pixmap = QtGui.QPixmap(os.path.join(SpriteHandler.basepath, new_path))
+        """Updates the sprite preview image."""
+        full_path = os.path.join(SpriteHandler.basepath, new_path)
+        pixmap = QtGui.QPixmap(full_path)
         self.spritePreview.setPixmap(pixmap)
         self.spritePreview.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     def duplicate_wizard(self) -> None:
+        """Opens the duplicate wizard dialog."""
         self.infoBox.appendPlainText("Loading all duplicates...")
         self.infoBox.appendPlainText("(This might take a while)")
         self.infoBox.repaint()
@@ -204,32 +228,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         wizard.exec()
 
     def animation_duplicates(self) -> None:
+        """Opens the duplicate wizard for the selected animation."""
         current_item = self.animationsListWidget.currentItem()
         if current_item:
             self.infoBox.appendPlainText("Loading animation duplicates...")
             self.infoBox.repaint()
             selected_animation = current_item.text()
-            self.animationFilterLineEdit.setText("")
+            self.animationFilterLineEdit.clear()
             self.filter_animations()
             wizard = WizardDialog(selected_animation)
             wizard.exec()
 
     def update_autoplay(self, value: int) -> None:
+        """Starts or stops autoplay of the animation based on checkbox state."""
         if value == QtCore.Qt.CheckState.Checked.value:
-            if self.spritesListWidget.item(0):
+            if self.spritesListWidget.count() > 0:
                 self.playAnimationButton.setEnabled(False)
                 self.spritesListWidget.setCurrentRow(0)
                 QtCore.QTimer.singleShot(80, self.frame_timer)
 
     def play_animation(self) -> None:
-        if self.spritesListWidget.item(0):
+        """Plays the selected animation."""
+        if self.spritesListWidget.count() > 0:
             if not self.autoplayAnimationCheckBox.isChecked():
                 self.playAnimationButton.setEnabled(False)
                 self.spritesListWidget.setCurrentRow(0)
                 QtCore.QTimer.singleShot(80, self.frame_timer)
 
     def frame_timer(self) -> None:
-        if self.spritesListWidget.item(0):
+        """Advances the animation frame by frame."""
+        if self.spritesListWidget.count() > 0:
             current_row = self.spritesListWidget.currentRow()
             if current_row + 1 >= self.spritesListWidget.count():
                 self.spritesListWidget.setCurrentRow(0)
@@ -242,6 +270,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 QtCore.QTimer.singleShot(80, self.frame_timer)
 
     def filter_animations(self) -> None:
+        """Filters the animations based on the text in the filter line edit."""
         animations = SpriteHandler.load_animations(self.animationFilterLineEdit.text())
         self.animationsListWidget.clear()
         self.animationsListWidget.addItems(animations)
@@ -249,40 +278,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.animationsListWidget.setCurrentRow(0)
 
     def recover_saved_state(self) -> None:
-        save_path = path.join(
-            path.expanduser("~"), "CustomKnight Creator", "savestate.json"
+        """Recovers the saved state from a JSON file."""
+        save_path = os.path.join(
+            os.path.expanduser("~"), "CustomKnight Creator", "savestate.json"
         )
-        if not path.exists(path.dirname(save_path)):
-            makedirs(path.dirname(save_path), exist_ok=True)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-        if not path.exists(save_path):
+        if not os.path.exists(save_path):
             return
 
         with open(save_path, "r", encoding="utf-8") as save_file:
-            if path.getsize(save_path) != 0:
+            if os.path.getsize(save_path) != 0:
                 save_data = json.load(save_file)
 
                 self.root_folders = [Path(folder) for folder in save_data.get("openFolders", [])]
                 self.rootFoldersListWidget.addItems([folder.name for folder in self.root_folders])
                 if self.root_folders:
                     self.base_path = self.root_folders[0].parent
+                    SpriteHandler.basepath = str(self.base_path)
                     self.load_categories()
                     SpriteHandler.categories.update(save_data.get("enabledCategories", {}))
-                    self.update_enabled()
+                    self.update_enabled_categories()
                     self.load_animations()
                 output_folder = save_data.get("outputFolder", "")
                 SpriteHandler.savedOutputFolder = output_folder
                 self.outputFolderLineEdit.setText(output_folder)
 
     def update_saved_state(self) -> None:
+        """Saves the current state to a JSON file."""
         save_data = {
             "openFolders": [str(folder) for folder in self.root_folders],
             "enabledCategories": SpriteHandler.categories,
             "outputFolder": SpriteHandler.savedOutputFolder,
         }
-        save_path = path.join(
-            path.expanduser("~"), "CustomKnight Creator", "savestate.json"
+        save_path = os.path.join(
+            os.path.expanduser("~"), "CustomKnight Creator", "savestate.json"
         )
-        makedirs(path.dirname(save_path), exist_ok=True)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "w", encoding="utf-8") as output_file:
             json.dump(save_data, output_file, indent=4)

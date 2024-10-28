@@ -1,0 +1,10 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/resources">
+    <file>resources/checkicon.png</file>
+    <file>resources/duplicatedata.json</file>
+    <file>resources/SheoIcon.icns</file>
+    <file>resources/SheoIcon.ico</file>
+    <file>resources/SheoIcon.png</file>
+    <file>resources/xicon.png</file>
+</qresource>
+</RCC>
