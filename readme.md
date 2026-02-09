@@ -8,7 +8,7 @@ Inspired by [SpritePacker](https://github.com/magegihk/HollowKnight.SpritePacker
 
 ## Installing
 
-* Go to the [releases](https://github.com/cmot17/CustomKnight-Creator/releases) to find the latest version.
+* Go to the [releases](https://github.com/littlepiggeon/CustomKnight-Creator/releases) to find the latest version.
 
 ## Usage
 
@@ -18,26 +18,17 @@ Visit the [wiki](https://github.com/cmot17/CustomKnight-Creator/wiki) for a writ
 
 ## Running from source
 
-* This project is built using Python 3.10.
-* To run the project, just download the source code, install the dependencies (preferably in a [virtual environment](https://docs.python.org/3/tutorial/venv.html)) and run main.py.
-    * PyQt6: `python -m pip install PyQt6`
-    * Pillow: `pythom -m pip install Pillow`
+* This project is built using Python 3.12.
+* To run the project, just download the source code, install the dependencies [UV](https://docs.astral.sh/uv) and run main.py.
+* `uv sync`
 
 ## Packaging
 
-To package the project, use the following [PyInstaller](https://github.com/pyinstaller/pyinstaller) commands: (they are platform specific)
+To package the project, use the following [nuitka](http://nuitka.net/) commands: (they are platform specific)
 
-### MacOS:
-```
-pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.icns --add-data resources:resources
-```
 ### Windows:
 ```
-pyinstaller main.py -F -w -n "CustomKnight Creator" -i resources/SheoIcon.ico --add-data "resources;resources"
-```
-### Linux:
-```
-pyinstaller main.py -F -n "CustomKnight Creator" --add-data "resources:resources"
+.\.venv\Scripts\python.exe -m nuitka --standalone --output-dir=../output --main=./main.py --output-filename="CustomKnight Creator" --windows-icon-from-ico=./resources/SheoIcon.ico --include-data-dir=./resources=resources --enable-plugin=pyside6 --windows-console-mode=disable
 ```
 
 ## Help
@@ -45,19 +36,11 @@ pyinstaller main.py -F -n "CustomKnight Creator" --add-data "resources:resources
 If you have any problems, feel free to open an issue on this GitHub.
 
 ## Authors
-cmot17
-
-## Version History
-
-* 1.0
-    * Initial Release
+littlepiggeon(cmot17)
 
 ## License
 
-This project is licensed under the GNU GPLv3 License - see the LICENSE.md file for details
+This project is licensed under the GNU GPLv3 License - see the LICENSE.md file for details  
 
-## Acknowledgments
-
-* Huge thanks to Maverick#2345 for being incredibly helpful throughout the developement, writing much of the tutorial, and providing lots of useful testing + feedback.
-* anjaperryyeet#9759 for feedback on the UI
-* MageGi for [SpritePacker](https://github.com/magegihk/HollowKnight.SpritePacker), the inspiration for this program
+## At Last...
+**THANKS TO cmot17!!!**

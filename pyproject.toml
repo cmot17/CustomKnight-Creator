@@ -1,0 +1,7 @@
+[project]
+name = "customknight-creator"
+version = "1.0.0"
+description = "I Fixed it"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = ["Pillow>=9.1.1","PySide6","nuitka","zstandard"]

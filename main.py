@@ -3,8 +3,8 @@ import sys
 import json
 
 from spritehandler import spriteHandler
-from PyQt6 import QtGui, QtCore
-from PyQt6.QtWidgets import *
+from PySide6 import QtGui, QtCore
+from PySide6.QtWidgets import *
 from pathlib import Path
 from os import path, makedirs
 from PIL import Image

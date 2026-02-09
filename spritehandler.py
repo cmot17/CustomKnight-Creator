@@ -3,7 +3,7 @@ import math
 from PIL import Image
 import os
 import os.path
-from PyQt6.QtWidgets import *
+from PySide6.QtWidgets import *
 import copy
 
 
@@ -142,8 +142,14 @@ class spriteHandler:
                             # print(maxH)
                 # print(maxW)
                 # print(maxH)
-                maxW = 2 ** math.ceil(math.log2(maxW - 1))
-                maxH = 2 ** math.ceil(math.log2(maxH - 1))
+                if maxW <= 1:
+                    maxW = 1
+                else:
+                    maxW = 2 ** math.ceil(math.log2(maxW - 1))
+                if maxH <= 1:
+                    maxH = 1
+                else:
+                    maxH = 2 ** math.ceil(math.log2(maxH - 1))
                 # print(maxW)
                 # print(maxH)
 
